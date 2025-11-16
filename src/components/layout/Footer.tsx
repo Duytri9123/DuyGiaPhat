@@ -42,7 +42,7 @@ export default function Footer() {
               {categories.slice(0, 6).map((cat) => (
                 <li key={cat.slug}>
                   <Link to={`/danh-muc/${cat.slug}`} className="hover:text-blue-400 transition flex items-center gap-1">
-                    <span>{cat.icon}</span> {cat.name}
+                    <span></span> {cat.name}
                   </Link>
                 </li>
               ))}
