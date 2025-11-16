@@ -1,13 +1,13 @@
-// src/pages/CategoryPage.tsx
+// src/pages/Products.tsx
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { mockProducts} from "../data/mockData";
 import {categories } from "../data/categories";
 import ProductCard from "../components/common/ProductCard";
 import { useState, useMemo } from "react";
-import { Filter, ChevronDown, X } from "lucide-react";
+import { Search, Filter, ChevronDown, X } from "lucide-react";
 
-export default function CategoryPage() {
-  const { category: categorySlug } = useParams<{ category: string }>();
+export default function Products() {
+  const { category } = useParams<{ category?: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -15,36 +15,25 @@ export default function CategoryPage() {
   const [sortBy, setSortBy] = useState<"name" | "price-asc" | "price-desc">("name");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Tìm danh mục hiện tại
-  const currentCategory = categories.find((c) => c.slug === categorySlug);
-  if (!currentCategory && categorySlug) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-xl text-gray-600 mb-4">Danh mục không tồn tại</p>
-          <button
-            onClick={() => navigate("/san-pham")}
-            className="text-blue-600 hover:underline font-medium"
-          >
-            ← Quay lại sản phẩm
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // Lọc sản phẩm
   const filteredProducts = useMemo(() => {
-    let filtered = mockProducts.filter((p) => p.category === categorySlug);
+    let filtered = [...mockProducts];
 
+    // Lọc theo danh mục
+    if (category) {
+      filtered = filtered.filter((p) => p.category === category);
+    }
+
+    // Lọc theo tìm kiếm
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (p) =>
-          p.name.toLowerCase().includes(query)
+          p.name.toLowerCase().includes(query) 
       );
     }
 
+    // Sắp xếp
     filtered.sort((a, b) => {
       if (sortBy === "name") return a.name.localeCompare(b.name);
       if (sortBy === "price-asc") return a.price - b.price;
@@ -53,11 +42,14 @@ export default function CategoryPage() {
     });
 
     return filtered;
-  }, [categorySlug, searchQuery, sortBy]);
+  }, [category, searchQuery, sortBy]);
 
+  const currentCategory = categories.find((c) => c.slug === category);
   const pageTitle = searchQuery
-    ? `Tìm kiếm trong "${currentCategory?.name}": "${searchQuery}"`
-    : currentCategory?.name || "Danh mục";
+    ? `Tìm kiếm: "${searchQuery}"`
+    : currentCategory
+    ? currentCategory.name
+    : "Tất cả sản phẩm";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,11 +65,11 @@ export default function CategoryPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
+          {/* Sidebar Filters */}
           <aside className={`lg:w-64 ${showFilters ? "block" : "hidden lg:block"}`}>
             <div className="bg-white rounded-xl shadow p-6 sticky top-24">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-lg text-gray-800">Danh mục</h3>
+              <div className="flex items-center justify-between mb-4 lg:mb-6">
+                <h3 className="font-bold text-lg text-gray-800">Bộ lọc</h3>
                 <button
                   onClick={() => setShowFilters(false)}
                   className="lg:hidden text-gray-500 hover:text-gray-700"
@@ -86,30 +78,58 @@ export default function CategoryPage() {
                 </button>
               </div>
 
-              <ul className="space-y-2">
-                {categories.map((cat) => (
-                  <li key={cat.id}>
-                    <button
-                      onClick={() => navigate(`/danh-muc/${cat.slug}`)}
-                      className={`w-full text-left p-3 rounded-lg transition flex items-center justify-between ${
-                        cat.slug === categorySlug
-                          ? "bg-blue-100 text-blue-700 font-medium"
-                          : "hover:bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      <span>{cat.name}</span>
-                      <span className="text-xs text-gray-500">({cat.count})</span>
-                    </button>
+              {/* Danh mục */}
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-700 mb-3">Danh mục</h4>
+                <ul className="space-y-2">
+                  <li>
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        name="category"
+                        checked={!category}
+                        onChange={() => navigate("/san-pham")}
+                        className="mr-2 text-blue-600"
+                      />
+                      <span className={!category ? "font-medium text-blue-600" : "text-gray-700"}>
+                        Tất cả sản phẩm
+                      </span>
+                    </label>
                   </li>
-                ))}
-              </ul>
+                  {categories.map((cat) => (
+                    <li key={cat.id}>
+                      <label className="flex items-center justify-between cursor-pointer">
+                        <div className="flex items-center">
+                          <input
+                            type="radio"
+                            name="category"
+                            checked={category === cat.slug}
+                            onChange={() => navigate(`/danh-muc/${cat.slug}`)}
+                            className="mr-2 text-blue-600"
+                          />
+                          <span className={category === cat.slug ? "font-medium text-blue-600" : "text-gray-700"}>
+                            {cat.name}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-500">({cat.count})</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-              <button
-                onClick={() => navigate("/san-pham")}
-                className="mt-6 w-full text-sm text-blue-600 hover:underline text-center"
-              >
-                Xem tất cả sản phẩm
-              </button>
+              {/* Xóa bộ lọc */}
+              {(category || searchQuery) && (
+                <button
+                  onClick={() => {
+                    navigate("/san-pham");
+                    setShowFilters(false);
+                  }}
+                  className="w-full text-sm text-blue-600 hover:underline"
+                >
+                  Xóa tất cả bộ lọc
+                </button>
+              )}
             </div>
           </aside>
 
@@ -122,7 +142,7 @@ export default function CategoryPage() {
                 className="lg:hidden flex items-center gap-2 text-gray-700 hover:text-blue-600"
               >
                 <Filter size={18} />
-                <span>Danh mục</span>
+                <span>Bộ lọc</span>
               </button>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -142,7 +162,7 @@ export default function CategoryPage() {
             {/* Product Grid */}
             {filteredProducts.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-xl shadow">
-                <p className="text-xl text-gray-500 mb-4">Không có sản phẩm nào</p>
+                <p className="text-xl text-gray-500 mb-4">Không tìm thấy sản phẩm nào</p>
                 <button
                   onClick={() => navigate("/san-pham")}
                   className="text-blue-600 hover:underline font-medium"
