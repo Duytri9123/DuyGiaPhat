@@ -1,9 +1,8 @@
 // src/pages/About.tsx
-import { useNavigate } from "react-router-dom";
-import { Phone, Mail, MapPin, Clock, Shield, Truck, Wrench, Award, ChevronRight, ArrowRight } from "lucide-react";
+
+import { Phone, Mail, MapPin, Clock, Shield, Truck, Wrench, Award } from "lucide-react";
 
 export default function About() {
-  const navigate = useNavigate();
 
   const features = [
     { icon: Truck, title: "Giao hàng toàn quốc", desc: "Miễn phí nội thành HCM & HN" },
