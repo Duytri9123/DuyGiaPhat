@@ -1,10 +1,11 @@
 // src/pages/Home.tsx
 import { useNavigate } from "react-router-dom";
-import { mockProducts} from "../data/mockData";
-import {categories } from "../data/categories";
+import { mockProducts } from "../data/mockData";
+import { categories } from "../data/categories";
 import ProductCard from "../components/common/ProductCard";
 import { Phone, Shield, Truck, Wrench, Award, ChevronRight, Zap, ArrowRight, CheckCircle } from "lucide-react";
-
+import AMB_headerbanner from "../assets/AMB_headerbanner.jpg";
+import banner from "../assets/banner.jpg";
 export default function Home() {
   const navigate = useNavigate();
 
@@ -49,8 +50,8 @@ export default function Home() {
 
         {/* Image Background with Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-blue-900/90 to-slate-900/95">
-          <img 
-            src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1600&h=900&fit=crop" 
+          <img
+            src={AMB_headerbanner}
             alt="Industrial Equipment"
             className="w-full h-full object-cover opacity-20"
           />
@@ -65,7 +66,7 @@ export default function Home() {
                   ⚡ Nhà phân phối thiết bị cơ điện hàng đầu
                 </span>
               </div>
-              
+
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                 Giải pháp{" "}
                 <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 bg-clip-text text-transparent">
@@ -73,9 +74,9 @@ export default function Home() {
                 </span>
                 <br />Toàn Diện
               </h1>
-              
+
               <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
-                Cung cấp động cơ, biến tần, tủ điện, máy bơm, cáp điện chính hãng 
+                Cung cấp động cơ, biến tần, tủ điện, máy bơm, cáp điện chính hãng
                 cho nhà máy, khu công nghiệp và dự án lớn trên toàn quốc.
               </p>
 
@@ -92,11 +93,11 @@ export default function Home() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <a
-                  href="tel:19001234"
+                  href="tel:0976707297"
                   className="group bg-gradient-to-r from-yellow-400 to-orange-500 text-slate-900 px-6 md:px-8 py-3.5 md:py-4 rounded-lg font-bold hover:from-yellow-300 hover:to-orange-400 transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 transform hover:scale-105"
                 >
                   <Phone size={20} className="group-hover:animate-pulse" />
-                  <span className="text-base md:text-lg">Gọi báo giá: 1900 1234</span>
+                  <span className="text-base md:text-lg">Gọi báo giá: 0976707297</span>
                 </a>
                 <button
                   onClick={() => navigate("/san-pham")}
@@ -113,12 +114,12 @@ export default function Home() {
               <div className="relative">
                 {/* Main Image Card */}
                 <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                  <img 
-                    src="https://images.unsplash.com/photo-1613665813446-82a78c468a1d?w=500&h=500&fit=crop" 
+                  <img
+                    src={banner}
                     alt="Electric Motor"
                     className="rounded-xl shadow-2xl w-full h-auto"
                   />
-                  
+
                   {/* Floating Badge */}
                   <div className="absolute -top-4 -right-4 bg-gradient-to-r from-green-400 to-emerald-500 text-white px-6 py-3 rounded-full font-bold shadow-xl rotate-12 animate-pulse">
                     <div className="text-center">
@@ -167,8 +168,8 @@ export default function Home() {
                 className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all hover:-translate-y-2 p-2 text-center border border-gray-100"
               >
                 <div className="mb-4 overflow-hidden rounded-xl">
-                  <img 
-                    src={cat.iconUrl} 
+                  <img
+                    src={cat.iconUrl}
                     alt={cat.name}
                     className="w-full h-32 object-cover group-hover:scale-110 transition-transform duration-300"
                   />
@@ -198,12 +199,12 @@ export default function Home() {
             <h2 className="text-4xl font-bold text-gray-800 mb-3">Sản phẩm bán chạy</h2>
             <p className="text-gray-600">Được hàng nghìn khách hàng tin dùng</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-1 lg:gap-6">
             {featuredProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
-                onToggleWishlist={() => {}}
+                onToggleWishlist={() => { }}
                 onClick={() => navigate(`/san-pham/${product.id}`)}
               />
             ))}
@@ -220,22 +221,57 @@ export default function Home() {
       </section>
 
       {/* Cam kết dịch vụ */}
-      <section className="py-16">
+      <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-3">Tại sao chọn Duy Gia Phát?</h2>
-            <p className="text-gray-600">Cam kết chất lượng – Đồng hành cùng dự án của bạn</p>
+            <div className="inline-block mb-4">
+              <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold">
+                ⭐ Cam kết chất lượng
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+              Tại sao chọn Duy Gia Phát?
+            </h2>
+            <p className="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
+              Đồng hành cùng dự án của bạn với đội ngũ chuyên nghiệp và dịch vụ tận tâm
+            </p>
           </div>
-          <div className="grid md:grid-cols-4 gap-8">
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {services.map((item, i) => (
-              <div key={i} className="text-center group">
-                <div className="bg-blue-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                  {item.icon}
+              <div
+                key={i}
+                className="group bg-white rounded-2xl p-4 md:p-6 shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-blue-200 hover:-translate-y-2"
+              >
+                <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4 text-blue-600 group-hover:bg-gradient-to-br group-hover:from-blue-600 group-hover:to-indigo-700 group-hover:text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+                  <div className="scale-75 md:scale-90 lg:scale-100">
+                    {item.icon}
+                  </div>
                 </div>
-                <h3 className="font-bold text-lg text-gray-800 mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm">{item.desc}</p>
+                <h3 className="font-bold text-sm md:text-base lg:text-lg text-gray-800 mb-1 md:mb-2 group-hover:text-blue-600 transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-gray-600 text-xs md:text-sm leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
             ))}
+          </div>
+
+          {/* Trust badges */}
+          <div className="mt-12 flex flex-wrap justify-center items-center gap-4 md:gap-8 text-xs md:text-sm text-gray-500">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Hơn 10 năm kinh nghiệm</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span>Phục vụ 5000+ khách hàng</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+              <span>Đánh giá 4.9⭐</span>
+            </div>
           </div>
         </div>
       </section>
@@ -268,11 +304,11 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="tel:19001234"
+              href="tel:0976707297"
               className="bg-gradient-to-r from-yellow-400 to-orange-500 text-blue-900 px-10 py-5 rounded-full font-bold hover:from-yellow-300 hover:to-orange-400 transition shadow-xl text-lg flex items-center justify-center gap-3 transform hover:scale-105"
             >
               <Phone size={24} />
-              Gọi ngay: 1900 1234
+              Gọi ngay: 0976707297
             </a>
             <button
               onClick={() => navigate("/gioi-thieu")}

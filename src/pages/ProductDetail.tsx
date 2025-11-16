@@ -1,211 +1,280 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Heart, Star, Truck, Shield, ArrowLeft } from 'lucide-react';
+// src/pages/ProductDetail.tsx
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { mockProducts } from "../data/mockData";
+import { categories } from "../data/categories";
+import {
+  Phone, ChevronRight, ArrowLeft, ChevronLeft, ChevronRight as ChevronRightIcon, Check
+} from "lucide-react";
 
-const ProductDetail = () => {
-  const { id } = useParams();
+export default function ProductDetail() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  // Mock data - trong thực tế sẽ fetch từ API
-  const product = {
-    id: 1,
-    name: 'Bó hoa hồng đỏ cao cấp',
-    price: 350000,
-    oldPrice: 450000,
-    images: ['🌹', '🌹', '🌹', '🌹'],
-    rating: 4.8,
-    reviews: 152,
-    description: 'Bó hoa hồng đỏ tươi gồm 12 bông hồng Ecuador cao cấp, kèm hoa baby và lá phụ. Perfect choice for special occasions.',
-    inStock: true,
-    delivery: 'Giao hàng trong 2 giờ',
-    category: 'tinh-yeu'
-  };
+  const productId = parseInt(id || "0");
+  const product = mockProducts.find((p) => p.id === productId);
 
-  const relatedProducts = [
-    { id: 2, name: 'Bó hoa hồng phấn', price: 380000, image: '🌺', rating: 4.8 },
-    { id: 3, name: 'Bó hoa tulip', price: 400000, image: '🌷', rating: 4.6 },
-    { id: 4, name: 'Hoa hồng Ecuador', price: 550000, image: '🌹', rating: 4.9 },
-  ];
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+          <div className="text-6xl mb-4">box</div>
+          <p className="text-xl font-semibold text-gray-700 mb-4">Không tìm thấy sản phẩm</p>
+          <button
+            onClick={() => navigate("/san-pham")}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-blue-900 px-6 py-3 rounded-full font-bold hover:from-yellow-300 hover:to-orange-400 transition shadow-lg"
+          >
+            <ArrowLeft size={20} /> Quay lại danh sách
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const handleAddToCart = () => {
-    alert(`Đã thêm ${quantity} ${product.name} vào giỏ hàng!`);
-  };
+  const currentCategory = categories.find((c) => c.slug === product.category);
+  const relatedProducts = mockProducts
+    .filter((p) => p.category === product.category && p.id !== product.id)
+    .slice(0, 6);
 
-  const handleBuyNow = () => {
-    handleAddToCart();
-    navigate('/gio-hang');
-  };
+  const allImages = [product.image, ...(product.images || [])];
+  const totalImages = allImages.length;
+
+  const nextImage = () => setSelectedImage((prev) => (prev + 1) % totalImages);
+  const prevImage = () => setSelectedImage((prev) => (prev - 1 + totalImages) % totalImages);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-50">
-      {/* Header */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button 
-              onClick={() => navigate('/')}
-              className="text-2xl font-bold text-rose-600 flex items-center space-x-2"
-            >
-              <span>🌸</span>
-              <span>Hoa Tươi Xinh</span>
-            </button>
-            
-            <button 
-              onClick={() => navigate('/gio-hang')}
-              className="relative text-gray-700 hover:text-rose-600"
-            >
-              <ShoppingCart size={24} />
-            </button>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Navigation */}
-        <button 
-          onClick={() => navigate(-1)}
-          className="flex items-center space-x-2 text-gray-600 hover:text-rose-600 mb-6"
-        >
-          <ArrowLeft size={20} />
-          <span>Quay lại</span>
-        </button>
+        {/* Breadcrumb */}
+        <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8 overflow-x-auto">
+          <button onClick={() => navigate("/")} className="hover:text-blue-600 whitespace-nowrap">Trang chủ</button>
+          <ChevronRight size={16} />
+          <button onClick={() => navigate("/san-pham")} className="hover:text-blue-600 whitespace-nowrap">Sản phẩm</button>
+          {currentCategory && (
+            <>
+              <ChevronRight size={16} />
+              <button
+                onClick={() => navigate(`/danh-muc/${currentCategory.slug}`)}
+                className="hover:text-blue-600 whitespace-nowrap"
+              >
+                {currentCategory.name}
+              </button>
+            </>
+          )}
+          <ChevronRight size={16} />
+          <span className="text-gray-900 font-medium whitespace-nowrap">{product.name}</span>
+        </nav>
 
-        <div className="grid md:grid-cols-2 gap-12 mb-16">
-          {/* Product Images */}
-          <div>
-            <div className="bg-white rounded-2xl p-8 shadow-lg mb-4">
-              <div className="text-9xl text-center mb-6">
-                {product.images[selectedImage]}
+        <div className="grid lg:grid-cols-2 gap-12 mb-20">
+          {/* === GALLERY ẢNH === */}
+          <div className="space-y-6">
+            <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden group">
+              <div className="aspect-square relative">
+                <img
+                  src={allImages[selectedImage]}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+                {totalImages > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur rounded-full p-3 shadow-lg hover:bg-white transition opacity-0 group-hover:opacity-100"
+                    >
+                      <ChevronLeft size={24} />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur rounded-full p-3 shadow-lg hover:bg-white transition opacity-0 group-hover:opacity-100"
+                    >
+                      <ChevronRightIcon size={24} />
+                    </button>
+                  </>
+                )}
+                {product.badge && (
+                  <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                    {product.badge}
+                  </div>
+                )}
               </div>
             </div>
-            
-            <div className="flex space-x-4">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition ${
-                    selectedImage === index ? 'ring-2 ring-rose-500' : ''
-                  }`}
-                >
-                  <div className="text-3xl">{image}</div>
-                </button>
+
+            {totalImages > 1 && (
+              <div className="grid grid-cols-5 gap-3">
+                {allImages.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImage(i)}
+                    className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                      selectedImage === i ? "border-yellow-500 shadow-lg" : "border-gray-200 hover:border-gray-400"
+                    }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* === THÔNG TIN CHI TIẾT === */}
+          <div className="space-y-8">
+            {/* Tiêu đề */}
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 leading-tight">
+                {product.name}
+              </h1>
+              <div className="flex items-center gap-6 text-sm">
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <svg
+                      key={i}
+                      className={`w-5 h-5 ${
+                        i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
+                      }`}
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                    </svg>
+                  ))}
+                  <span className="ml-2 font-medium text-gray-700">{product.rating}</span>
+                </div>
+                <span className="text-gray-500">•</span>
+                <span className="text-gray-600">{product.sales} lượt đặt hàng</span>
+              </div>
+            </div>
+
+            {/* MÔ TẢ + THÔNG SỐ KỸ THUẬT */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <h3 className="font-bold text-lg mb-4 text-gray-800">Mô tả sản phẩm</h3>
+              <p className="text-gray-600 leading-relaxed mb-6">{product.description}</p>
+
+              {product.specs && product.specs.length > 0 && (
+                <>
+                  <h4 className="font-bold text-lg mb-3 text-gray-800">Thông số kỹ thuật</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {product.specs.map((spec, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm">
+                        <Check className="text-green-500 mt-0.5 flex-shrink-0" size={16} />
+                        <div>
+                          <span className="font-medium text-gray-700">{spec.label}:</span>
+                          <span className="ml-1 text-gray-800">{spec.value}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* NÚT BÁO GIÁ + ZALO - MÀU VÀNG CAM */}
+            <div className="flex gap-3">
+              {/* Nút Báo giá */}
+              <a
+                href={`tel:0976707297`}
+                className={`flex-1 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 text-lg transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 ${
+                  product.inStock
+                    ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-blue-900 hover:from-yellow-300 hover:to-orange-400"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}
+                {...(!product.inStock && { "aria-disabled": true })}
+              >
+                <Phone size={22} />
+                <span>Báo giá ngay</span>
+              </a>
+
+              {/* Nút Zalo */}
+              <a
+                href="https://zalo.me/0976707297"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all shadow-xl hover:shadow-2xl flex items-center justify-center"
+              >
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.89 1.402 5.45 3.589 7.163l-.766 2.844a.5.5 0 00.713.572l3.167-1.823A10.277 10.277 0 0012 20.486c5.523 0 10-4.145 10-9.243C22 6.145 17.523 2 12 2zm3.5 11.5h-7a.5.5 0 010-1h7a.5.5 0 010 1zm0-3h-7a.5.5 0 010-1h7a.5.5 0 010 1z" />
+                </svg>
+              </a>
+            </div>
+
+            {/* Cam kết */}
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              {[
+                "Hàng chính hãng 100%",
+                "Giao hàng toàn quốc",
+                "Hỗ trợ lắp đặt",
+                "Bảo hành dài hạn",
+                "CO/CQ đầy đủ",
+                "Tư vấn 24/7",
+              ].map((text, i) => (
+                <div key={i} className="flex items-center gap-2 text-green-600">
+                  <Check size={18} />
+                  <span className="font-medium">{text}</span>
+                </div>
               ))}
             </div>
           </div>
-
-          {/* Product Info */}
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">{product.name}</h1>
-            
-            <div className="flex items-center mb-6 space-x-4">
-              <div className="flex items-center">
-                <Star size={20} className="text-yellow-400 fill-current" />
-                <span className="ml-1 text-lg font-medium">{product.rating}</span>
-              </div>
-              <span className="text-gray-500">({product.reviews} đánh giá)</span>
-              <span className="text-green-600 font-medium">Còn hàng</span>
-            </div>
-
-            <div className="mb-6">
-              {product.oldPrice && (
-                <span className="text-gray-400 line-through text-xl mr-3">
-                  {product.oldPrice.toLocaleString()}đ
-                </span>
-              )}
-              <span className="text-rose-600 font-bold text-4xl">
-                {product.price.toLocaleString()}đ
-              </span>
-            </div>
-
-            <p className="text-gray-600 mb-8 leading-relaxed">{product.description}</p>
-
-            {/* Quantity Selector */}
-            <div className="mb-8">
-              <label className="block text-gray-700 font-medium mb-3">Số lượng:</label>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center border border-gray-300 rounded-lg">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-4 py-2 text-gray-600 hover:text-rose-600"
-                  >
-                    -
-                  </button>
-                  <span className="px-4 py-2 border-x border-gray-300 font-medium">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="px-4 py-2 text-gray-600 hover:text-rose-600"
-                  >
-                    +
-                  </button>
-                </div>
-                <span className="text-gray-500">Còn 25 sản phẩm</span>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 bg-rose-600 text-white py-4 rounded-xl font-bold hover:bg-rose-700 transition flex items-center justify-center space-x-2"
-              >
-                <ShoppingCart size={24} />
-                <span>Thêm vào giỏ hàng</span>
-              </button>
-              <button
-                onClick={handleBuyNow}
-                className="flex-1 bg-yellow-400 text-rose-700 py-4 rounded-xl font-bold hover:bg-yellow-300 transition"
-              >
-                Mua ngay
-              </button>
-            </div>
-
-            {/* Features */}
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-gray-600">
-                <Truck size={20} />
-                <span>{product.delivery}</span>
-              </div>
-              <div className="flex items-center space-x-3 text-gray-600">
-                <Shield size={20} />
-                <span>Đảm bảo hoa tươi 100%</span>
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* Related Products */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-rose-600 mb-8">Sản phẩm liên quan</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {relatedProducts.map(product => (
-              <div key={product.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
-                <div className="h-48 bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center">
-                  <div className="text-6xl">{product.image}</div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-gray-800 mb-2">{product.name}</h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-rose-600 font-bold text-lg">
-                      {product.price.toLocaleString()}đ
-                    </span>
-                    <div className="flex items-center">
-                      <Star size={16} className="text-yellow-400 fill-current" />
-                      <span className="ml-1 text-sm">{product.rating}</span>
+        {/* SẢN PHẨM LIÊN QUAN */}
+        {relatedProducts.length > 0 && (
+          <section className="mb-20">
+            <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">
+              Sản phẩm cùng danh mục
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+              {relatedProducts.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedImage(0);
+                    navigate(`/san-pham/${item.id}`);
+                    window.scrollTo(0, 0);
+                  }}
+                  className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all hover:-translate-y-3 text-left overflow-hidden"
+                >
+                  <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    {item.badge && (
+                      <span className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs px-3 py-1 rounded-full font-bold">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition">
+                      {item.name}
+                    </h3>
+                    <div className="mt-3 flex gap-2">
+                      <a
+                        href="tel:0976707297"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 text-center py-2 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-blue-900 text-xs font-bold hover:from-yellow-300 hover:to-orange-400 transition shadow"
+                      >
+                        Báo giá
+                      </a>
+                      <a
+                        href="https://zalo.me/0976707297"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="px-2 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.89 1.402 5.45 3.589 7.163l-.766 2.844a.5.5 0 00.713.572l3.167-1.823A10.277 10.277 0 0012 20.486c5.523 0 10-4.145 10-9.243C22 6.145 17.523 2 12 2zm3.5 11.5h-7a.5.5 0 010-1h7a.5.5 0 010 1zm0-3h-7a.5.5 0 010-1h7a.5.5 0 010 1z" />
+                        </svg>
+                      </a>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
-};
-
-export default ProductDetail;
+}

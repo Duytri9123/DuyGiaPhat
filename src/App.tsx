@@ -30,13 +30,6 @@ function App() {
         <Route path="/gioi-thieu" element={<About />} />
         <Route path="/about" element={<Navigate to="/gioi-thieu" replace />} />
 
-        {/* Redirect slug cũ (tương thích SEO) */}
-        <Route path="/danh-muc/dong-co-dien" element={<Navigate to="/danh-muc/dong-co" replace />} />
-        <Route path="/danh-muc/bien-tan-inverter" element={<Navigate to="/danh-muc/bien-tan" replace />} />
-        <Route path="/danh-muc/may-bom-nuoc" element={<Navigate to="/danh-muc/may-bom" replace />} />
-        <Route path="/danh-muc/tu-dien-dieu-khien" element={<Navigate to="/danh-muc/tu-dien" replace />} />
-        <Route path="/danh-muc/cap-dien-cong-nghiep" element={<Navigate to="/danh-muc/cap-dien" replace />} />
-        <Route path="/danh-muc/dung-cu-co-khi" element={<Navigate to="/danh-muc/dung-cu" replace />} />
 
         {/* 404 - Về trang chủ */}
         <Route path="*" element={<Navigate to="/" replace />} />

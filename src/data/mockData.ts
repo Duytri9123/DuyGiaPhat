@@ -1,27 +1,19 @@
 // src/data/mockData.ts
+
+import images from '../assets/images';
+
 export interface Product {
   id: number;
   name: string;
-  price: number;
-  oldPrice?: number;
   image: string;
+  images: string[];
   rating: number;
   sales: number;
   badge?: string;
-  category: string; // slug
+  category: string;
   inStock: boolean;
   description?: string;
   specs?: { label: string; value: string }[];
-  featured?: boolean;
-}
-
-export interface Category {
-  id: number;
-  name: string;
-  icon: string;
-  count: number;
-  slug: string;
-  description?: string;
   featured?: boolean;
 }
 
@@ -35,15 +27,13 @@ export interface Testimonial {
   date: string;
 }
 
-// === SẢN PHẨM ===
 export const mockProducts: Product[] = [
   // TỦ ĐIỆN
   {
     id: 1,
     name: "Tủ trạm hạ thế 630A",
-    price: 45000000,
-    oldPrice: 52000000,
-    image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop",
+    image: images.tuTram,
+    images: [images.tuTram],
     rating: 4.9,
     sales: 78,
     badge: "Bán chạy",
@@ -62,9 +52,8 @@ export const mockProducts: Product[] = [
   {
     id: 2,
     name: "Tủ điều khiển BMS tòa nhà",
-    price: 85000000,
-    oldPrice: 95000000,
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
+    image: images.tuDieuKhienBms,
+    images: [images.tuDieuKhienBms],
     rating: 5.0,
     sales: 45,
     badge: "Cao cấp",
@@ -83,8 +72,8 @@ export const mockProducts: Product[] = [
   {
     id: 3,
     name: "Tủ công tơ 15 hộ dân",
-    price: 12500000,
-    image: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
+    image: images.tuCongTo,
+    images: [images.tuCongTo],
     rating: 4.7,
     sales: 156,
     category: "tu-dien",
@@ -100,9 +89,8 @@ export const mockProducts: Product[] = [
   {
     id: 4,
     name: "Tủ điều khiển động cơ biến tần 15kW",
-    price: 28000000,
-    oldPrice: 32000000,
-    image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=400&h=400&fit=crop",
+    image: images.tuDieuKhienDongCoKhoiDongTruc, 
+    images: [images.tuDieuKhienDongCoKhoiDongTruc],
     rating: 4.8,
     sales: 92,
     badge: "Mới",
@@ -120,8 +108,8 @@ export const mockProducts: Product[] = [
   {
     id: 5,
     name: "Tủ điều khiển động cơ 2 cấp tốc độ",
-    price: 18500000,
-    image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop",
+    image: images.tuDieuKhienDongCo2Cap,
+    images: [images.tuDieuKhienDongCo2Cap],
     rating: 4.6,
     sales: 67,
     category: "tu-dieu-khien",
@@ -135,29 +123,10 @@ export const mockProducts: Product[] = [
     ],
   },
   {
-    id: 6,
-    name: "Tủ điều khiển động cơ khởi động trực tiếp (MCC)",
-    price: 15800000,
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
-    rating: 4.7,
-    sales: 134,
-    badge: "Bán chạy",
-    category: "tu-dieu-khien",
-    inStock: true,
-    description: "Tủ MCC khởi động trực tiếp DOL, dùng contactor Schneider",
-    specs: [
-      { label: "Công suất động cơ", value: "5.5kW" },
-      { label: "Contactor", value: "Schneider LC1D32" },
-      { label: "Relay nhiệt", value: "LR2D3353" },
-      { label: "Nút nhấn", value: "XB4 series" },
-    ],
-  },
-  {
     id: 7,
     name: "Tủ ATS chuyển nguồn tự động 400A",
-    price: 52000000,
-    oldPrice: 58000000,
-    image: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
+    image: images.tuAts,
+    images: [images.tuAts],
     rating: 4.9,
     sales: 56,
     badge: "Cao cấp",
@@ -175,8 +144,8 @@ export const mockProducts: Product[] = [
   {
     id: 8,
     name: "Tủ phòng cháy chữa cháy PCCC",
-    price: 38000000,
-    image: "https://images.unsplash.com/photo-1585933646315-8e759dcc565d?w=400&h=400&fit=crop",
+    image: images.tuPhongChayChuaChay,
+    images: [images.tuPhongChayChuaChay],
     rating: 4.8,
     sales: 89,
     category: "tu-cuu-hoa",
@@ -190,143 +159,17 @@ export const mockProducts: Product[] = [
     ],
     featured: true,
   },
-  {
-    id: 9,
-    name: "Tủ xử lý nước thải công nghiệp",
-    price: 42000000,
-    image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=400&h=400&fit=crop",
-    rating: 4.7,
-    sales: 73,
-    category: "tu-dieu-khien",
-    inStock: true,
-    description: "Tủ điều khiển hệ thống xử lý nước thải, tích hợp PLC",
-    specs: [
-      { label: "PLC", value: "Mitsubishi FX3U" },
-      { label: "Số bơm điều khiển", value: "4 bơm" },
-      { label: "Cảm biến", value: "Mức nước, pH, DO" },
-      { label: "Giao tiếp", value: "RS485, Modbus" },
-    ],
-  },
-  {
-    id: 10,
-    name: "Tủ phân phối tổng DB 800A",
-    price: 68000000,
-    oldPrice: 75000000,
-    image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop",
-    rating: 4.9,
-    sales: 62,
-    badge: "Bán chạy",
-    category: "tu-dien",
-    inStock: true,
-    description: "Tủ phân phối điện tổng, MCCB 800A, 24 đường ra",
-    specs: [
-      { label: "MCCB chính", value: "800A" },
-      { label: "Số đường ra", value: "24 đường" },
-      { label: "Thanh cái", value: "Đồng 100x10mm" },
-      { label: "Chuẩn chống thấm", value: "IP54" },
-    ],
-    featured: true,
-  },
-  {
-    id: 11,
-    name: "Tủ thi công công trình 300A",
-    price: 22000000,
-    image: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
-    rating: 4.6,
-    sales: 145,
-    category: "tu-dien",
-    inStock: true,
-    description: "Tủ điện thi công di động, có bánh xe, chống va đập",
-    specs: [
-      { label: "Dòng định mức", value: "300A" },
-      { label: "Số ổ cắm", value: "12 ổ cắm công nghiệp" },
-      { label: "Vật liệu", value: "Thép dày 2mm" },
-      { label: "Di động", value: "Có bánh xe đẩy" },
-    ],
-  },
-  {
-    id: 12,
-    name: "Tủ điều khiển PLC Siemens S7-1200",
-    price: 55000000,
-    oldPrice: 62000000,
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
-    rating: 5.0,
-    sales: 38,
-    badge: "Cao cấp",
-    category: "tu-dieu-khien",
-    inStock: true,
-    description: "Tủ điều khiển tự động hóa, PLC Siemens S7-1200, HMI TP700",
-    specs: [
-      { label: "PLC", value: "Siemens S7-1200 CPU 1214C" },
-      { label: "HMI", value: "TP700 Comfort 7 inch" },
-      { label: "I/O", value: "64 điểm DI/DO, 16 AI/AO" },
-      { label: "Giao tiếp", value: "Profinet, Modbus TCP" },
-      { label: "Bảo hành", value: "36 tháng" },
-    ],
-    featured: true,
-  },
 
-  // VỎ TỦ
-  {
-    id: 13,
-    name: "Vỏ tủ điện treo tường 400x600x200",
-    price: 1850000,
-    image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=400&h=400&fit=crop",
-    rating: 4.5,
-    sales: 234,
-    category: "vo-tu",
-    inStock: true,
-    description: "Vỏ tủ điện treo tường, thép phủ tĩnh điện, có cửa kính",
-    specs: [
-      { label: "Kích thước", value: "400x600x200 mm" },
-      { label: "Vật liệu", value: "Thép tráng kẽm dày 1.2mm" },
-      { label: "Chuẩn chống thấm", value: "IP55" },
-      { label: "Màu sắc", value: "Xám RAL 7035" },
-    ],
-  },
-  {
-    id: 14,
-    name: "Vỏ tủ điện âm tường 500x700x150",
-    price: 2100000,
-    image: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
-    rating: 4.6,
-    sales: 178,
-    category: "vo-tu",
-    inStock: true,
-    description: "Vỏ tủ âm tường, tiết kiệm không gian, cửa thép",
-    specs: [
-      { label: "Kích thước", value: "500x700x150 mm" },
-      { label: "Loại lắp đặt", value: "Âm tường" },
-      { label: "Vật liệu cửa", value: "Thép phủ tĩnh điện" },
-    ],
-  },
-  {
-    id: 15,
-    name: "Vỏ tủ điện đứng sàn 800x2000x600",
-    price: 8500000,
-    oldPrice: 9500000,
-    image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=400&h=400&fit=crop",
-    rating: 4.8,
-    sales: 95,
-    badge: "Bán chạy",
-    category: "vo-tu",
-    inStock: true,
-    description: "Vỏ tủ điện đứng sàn, kích thước lớn, có hệ thống tản nhiệt",
-    specs: [
-      { label: "Kích thước", value: "800x2000x600 mm" },
-      { label: "Vật liệu", value: "Thép tráng kẽm dày 2mm" },
-      { label: "Chuẩn chống thấm", value: "IP54" },
-      { label: "Tản nhiệt", value: "Quạt và lỗ thoát khí" },
-    ],
-    featured: true,
-  },
-
-  // THANG MÁNG VÀ PHỤ KIỆN
+  // THANG MÁNG CÁP
   {
     id: 16,
     name: "Thang cáp 200mm x 3m mạ kẽm",
-    price: 285000,
-    image: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
+    image: images.coLenThangCap,
+    images: [
+      images.coLenThangCap,
+      images.ngaBaThangCap,
+      images.ngaTuThangCap,
+    ],
     rating: 4.7,
     sales: 567,
     badge: "Bán chạy",
@@ -343,8 +186,14 @@ export const mockProducts: Product[] = [
   {
     id: 17,
     name: "Máng cáp 100mm x 2.4m sơn tĩnh điện",
-    price: 165000,
-    image: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
+    image: images.mangCap,
+    images: [
+      images.mangCap,
+      images.coXuongMangCap,
+      images.ngaBaMangCap,
+      images.ngaTuMangCap,
+      images.cutVuong90DoMangCap,
+    ],
     rating: 4.6,
     sales: 445,
     category: "thang-mang-va-phu-kien",
@@ -357,24 +206,13 @@ export const mockProducts: Product[] = [
       { label: "Màu sắc", value: "Xám RAL 7035" },
     ],
   },
-  {
-    id: 18,
-    name: "Khóa nối thang cáp mạ kẽm",
-    price: 12000,
-    image: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
-    rating: 4.8,
-    sales: 1234,
-    category: "thang-mang-va-phu-kien",
-    inStock: true,
-    description: "Khóa nối thang cáp, vít inox, chắc chắn",
-  },
 
   // TỦ CỨU HỎA
   {
     id: 19,
     name: "Tủ đựng bình chữa cháy CO2 4.6kg",
-    price: 1200000,
-    image: "https://images.unsplash.com/photo-1585933646315-8e759dcc565d?w=400&h=400&fit=crop",
+    image: images.keDungBinhChuaChay,
+    images: [images.keDungBinhChuaChay],
     rating: 4.7,
     sales: 187,
     category: "tu-cuu-hoa",
@@ -390,9 +228,8 @@ export const mockProducts: Product[] = [
   {
     id: 20,
     name: "Tủ cứu hỏa tổng hợp 1200x1800x300",
-    price: 4500000,
-    oldPrice: 5200000,
-    image: "https://images.unsplash.com/photo-1585933646315-8e759dcc565d?w=400&h=400&fit=crop",
+    image: images.tuCuuHoa,
+    images: [images.tuCuuHoa, images.voTuTrongNhaVaNgoaiTroi],
     rating: 4.8,
     sales: 112,
     badge: "Bán chạy",
@@ -408,7 +245,6 @@ export const mockProducts: Product[] = [
     featured: true,
   },
 ];
-
 // === ĐÁNH GIÁ KHÁCH HÀNG ===
 export const testimonials: Testimonial[] = [
   {

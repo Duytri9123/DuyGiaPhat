@@ -1,16 +1,23 @@
 // src/components/layout/Header.tsx
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Search, Phone, ChevronDown } from "lucide-react";
 import { categories } from "../../data/categories";
+import { mockProducts } from "../../data/mockData";
 import logo from "../../assets/logo.jpg";
 
 export default function Header() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchQueryMobile, setSearchQueryMobile] = useState("");
+  const [showSuggestionsMobile, setShowSuggestionsMobile] = useState(false);
+  
   const navigate = useNavigate();
   const location = useLocation();
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchRefMobile = useRef<HTMLDivElement>(null);
 
   const mainMenu = [
     { label: "Trang chủ", path: "/" },
@@ -18,13 +25,82 @@ export default function Header() {
     { label: "Giới thiệu", path: "/gioi-thieu" },
   ];
 
+  // Lọc sản phẩm gợi ý - Desktop
+  const suggestions = searchQuery.trim()
+    ? mockProducts
+        .filter((p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .slice(0, 5)
+    : [];
+
+  // Lọc sản phẩm gợi ý - Mobile
+  const suggestionsMobile = searchQueryMobile.trim()
+    ? mockProducts
+        .filter((p) =>
+          p.name.toLowerCase().includes(searchQueryMobile.toLowerCase())
+        )
+        .slice(0, 5)
+    : [];
+
+  // Click outside để đóng suggestions - Desktop
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Click outside để đóng suggestions - Mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRefMobile.current &&
+        !searchRefMobile.current.contains(event.target as Node)
+      ) {
+        setShowSuggestionsMobile(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/tim-kiem?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSearchMobile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQueryMobile.trim()) {
+      navigate(`/tim-kiem?q=${encodeURIComponent(searchQueryMobile.trim())}`);
+      setSearchQueryMobile("");
+      setShowSuggestionsMobile(false);
       setSidebarOpen(false);
     }
+  };
+
+  const handleSuggestionClick = (productId: number) => {
+    navigate(`/san-pham/${productId}`);
+    setSearchQuery("");
+    setShowSuggestions(false);
+  };
+
+  const handleSuggestionClickMobile = (productId: number) => {
+    navigate(`/san-pham/${productId}`);
+    setSearchQueryMobile("");
+    setShowSuggestionsMobile(false);
+    setSidebarOpen(false);
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -36,17 +112,22 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-20 gap-4">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2 group flex-shrink-0">
-              <img 
-                src={logo} 
-                alt="Duy Gia Phát Logo" 
+            <Link
+              to="/"
+              className="flex items-center space-x-2 group flex-shrink-0"
+            >
+              <img
+                src={logo}
+                alt="Duy Gia Phát Logo"
                 className="h-18 w-auto group-hover:scale-105 transition-transform"
               />
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 via-orange-600 to-yellow-500 bg-clip-text text-transparent whitespace-nowrap">
                   Duy Gia Phát
                 </h1>
-                <p className="text-sm text-gray-500 -mt-0.5 hidden sm:block">Thiết bị cơ điện</p>
+                <p className="text-sm text-gray-500 -mt-0.5 hidden sm:block">
+                  Thiết bị cơ điện
+                </p>
               </div>
             </Link>
 
@@ -71,7 +152,11 @@ export default function Header() {
                 {/* Dropdown Danh mục */}
                 <div className="relative group">
                   <button className="px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 hover:text-blue-600 flex items-center gap-1 text-base whitespace-nowrap">
-                    Danh mục <ChevronDown size={16} className="group-hover:rotate-180 transition" />
+                    Danh mục{" "}
+                    <ChevronDown
+                      size={16}
+                      className="group-hover:rotate-180 transition"
+                    />
                   </button>
                   <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <div className="py-2">
@@ -84,7 +169,9 @@ export default function Header() {
                           <span className="flex items-center gap-2">
                             <span></span> {cat.name}
                           </span>
-                          <span className="text-xs text-gray-500">({cat.count})</span>
+                          <span className="text-xs text-gray-500">
+                            ({cat.count})
+                          </span>
                         </Link>
                       ))}
                       <div className="border-t mt-2 pt-2">
@@ -100,55 +187,87 @@ export default function Header() {
                 </div>
               </nav>
 
-              {/* Tìm kiếm nhỏ gọn */}
-              <form onSubmit={handleSearch} className="w-56">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Tìm kiếm..."
-                    className="w-full pl-9 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-shadow"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition"
-                  >
-                    <Search size={16} />
-                  </button>
-                </div>
-              </form>
+              {/* Tìm kiếm với gợi ý - Desktop */}
+              <div ref={searchRef} className="relative w-64">
+                <form onSubmit={handleSearch}>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setShowSuggestions(true);
+                      }}
+                      onFocus={() => setShowSuggestions(true)}
+                      placeholder="Tìm kiếm sản phẩm..."
+                      className="w-full pl-9 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-shadow"
+                    />
+                    <button
+                      type="submit"
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition"
+                    >
+                      <Search size={16} />
+                    </button>
+                  </div>
+                </form>
+
+                {/* Gợi ý tìm kiếm - Desktop */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 max-h-96 overflow-y-auto">
+                    <div className="p-2">
+                      <p className="px-3 py-2 text-xs text-gray-500 font-medium">
+                        Gợi ý sản phẩm
+                      </p>
+                      {suggestions.map((product) => (
+                        <button
+                          key={product.id}
+                          onClick={() => handleSuggestionClick(product.id)}
+                          className="w-full flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg transition text-left"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-800 line-clamp-1">
+                              {product.name}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs text-yellow-600">
+                                ⭐ {product.rating}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {product.sales} lượt mua
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                    {suggestions.length >= 5 && (
+                      <div className="border-t p-3">
+                        <button
+                          onClick={() => {
+                            handleSearch(new Event("submit") as any);
+                          }}
+                          className="w-full text-sm text-blue-600 font-medium hover:underline"
+                        >
+                          Xem tất cả kết quả →
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {/* Hotline */}
               <a
-                href="tel:19001234"
+                href="tel:0976707297"
                 className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-800 transition font-medium text-sm shadow-md whitespace-nowrap"
               >
                 <Phone size={16} />
-                <span>1900 1234</span>
+                <span>0976707297</span>
               </a>
             </div>
 
-            {/* Mobile: Tìm kiếm + Menu button */}
+            {/* Mobile: Menu button */}
             <div className="flex lg:hidden items-center gap-2">
-              <form onSubmit={handleSearch} className="hidden sm:block w-40">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Tìm..."
-                    className="w-full pl-8 pr-2 py-1.5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
-                  >
-                    <Search size={14} />
-                  </button>
-                </div>
-              </form>
-
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
@@ -171,37 +290,85 @@ export default function Header() {
             {/* Header sidebar */}
             <div className="sticky top-0 bg-white border-b z-10">
               <div className="p-4 flex items-center justify-between">
-                <Link to="/" className="flex items-center space-x-2" onClick={() => setSidebarOpen(false)}>
-                  <img 
-                    src={logo} 
-                    alt="Duy Gia Phát Logo" 
+                <Link
+                  to="/"
+                  className="flex items-center space-x-2"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <img
+                    src={logo}
+                    alt="Duy Gia Phát Logo"
                     className="h-8 w-auto"
                   />
                   <span className="font-bold text-lg bg-gradient-to-r from-orange-500 via-orange-600 to-yellow-500 bg-clip-text text-transparent">
                     Duy Gia Phát
                   </span>
                 </Link>
-                <button onClick={() => setSidebarOpen(false)} className="p-1 hover:bg-gray-100 rounded-lg transition">
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="p-1 hover:bg-gray-100 rounded-lg transition"
+                >
                   <X size={24} />
                 </button>
               </div>
 
-              {/* Tìm kiếm trong sidebar */}
-              <div className="px-4 pb-4">
-                <form onSubmit={handleSearch}>
+              {/* Tìm kiếm trong sidebar với gợi ý */}
+              <div ref={searchRefMobile} className="px-4 pb-4 relative">
+                <form onSubmit={handleSearchMobile}>
                   <div className="relative">
                     <input
                       type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Tìm động cơ, biến tần..."
+                      value={searchQueryMobile}
+                      onChange={(e) => {
+                        setSearchQueryMobile(e.target.value);
+                        setShowSuggestionsMobile(true);
+                      }}
+                      onFocus={() => setShowSuggestionsMobile(true)}
+                      placeholder="Tìm kiếm sản phẩm..."
                       className="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     />
-                    <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
+                    <button
+                      type="submit"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600"
+                    >
                       <Search size={18} />
                     </button>
                   </div>
                 </form>
+
+                {/* Gợi ý tìm kiếm - Mobile */}
+                {showSuggestionsMobile && suggestionsMobile.length > 0 && (
+                  <div className="absolute top-full left-4 right-4 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 max-h-80 overflow-y-auto">
+                    <div className="p-2">
+                      <p className="px-3 py-2 text-xs text-gray-500 font-medium">
+                        Gợi ý sản phẩm
+                      </p>
+                      {suggestionsMobile.map((product) => (
+                        <button
+                          key={product.id}
+                          onClick={() =>
+                            handleSuggestionClickMobile(product.id)
+                          }
+                          className="w-full flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg transition text-left"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-800 line-clamp-1">
+                              {product.name}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs text-yellow-600">
+                                ⭐ {product.rating}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {product.sales} lượt mua
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -213,7 +380,9 @@ export default function Header() {
                   to={item.path}
                   onClick={() => setSidebarOpen(false)}
                   className={`block py-3 px-4 rounded-lg transition text-base font-medium ${
-                    isActive(item.path) ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+                    isActive(item.path)
+                      ? "bg-blue-100 text-blue-700"
+                      : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   {item.label}
@@ -227,14 +396,22 @@ export default function Header() {
                   className="w-full flex items-center justify-between py-3 px-4 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 transition"
                 >
                   <span>Danh mục sản phẩm</span>
-                  <ChevronDown 
-                    size={20} 
-                    className={`transition-transform ${categoriesOpen ? "rotate-180" : ""}`}
+                  <ChevronDown
+                    size={20}
+                    className={`transition-transform ${
+                      categoriesOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
 
-                {/* Categories list - chỉ hiện khi toggle */}
-                <div className={`overflow-hidden transition-all duration-300 ${categoriesOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
+                {/* Categories list */}
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    categoriesOpen
+                      ? "max-h-[500px] opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
                   <div className="mt-2 space-y-1">
                     {categories.map((cat) => (
                       <Link
@@ -257,11 +434,11 @@ export default function Header() {
 
               {/* Hotline button */}
               <a
-                href="tel:19001234"
+                href="tel:0976707297"
                 className="flex items-center justify-center space-x-2 mt-6 py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg hover:from-blue-700 hover:to-indigo-800 transition font-medium shadow-lg"
               >
                 <Phone size={18} />
-                <span>Gọi ngay: 1900 1234</span>
+                <span>Gọi ngay: 0976707297</span>
               </a>
             </nav>
           </div>
