@@ -1,30 +1,88 @@
 // src/components/common/ProductCard.tsx
 import { Heart, Star, Phone } from 'lucide-react';
 import { type Product } from '../../data/mockData';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ProductCardProps {
   product: Product;
-  onToggleWishlist: (product: Product) => void;
   onClick: () => void;
-  isWishlisted?: boolean;
 }
 
 export default function ProductCard({
   product,
-  onToggleWishlist,
   onClick,
-  isWishlisted = false,
 }: ProductCardProps) {
-  // State để theo dõi lỗi tải ảnh
   const [imageError, setImageError] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
-  // Ảnh fallback (Unsplash hoặc placeholder)
+  // Ảnh fallback
   const fallbackImage =
     'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop';
 
-  // Ảnh thực tế
   const displayImage = imageError ? fallbackImage : product.image;
+
+  // Kiểm tra sản phẩm có trong wishlist không
+  useEffect(() => {
+    const checkWishlist = () => {
+      const savedWishlist = localStorage.getItem('wishlist');
+      if (savedWishlist) {
+        try {
+          const wishlist = JSON.parse(savedWishlist);
+          const isInWishlist = wishlist.some((item: Product) => item.id === product.id);
+          setIsWishlisted(isInWishlist);
+        } catch (error) {
+          console.error('Error checking wishlist:', error);
+        }
+      }
+    };
+
+    checkWishlist();
+
+    // Listen cho wishlist updates
+    const handleWishlistUpdate = () => {
+      checkWishlist();
+    };
+
+    window.addEventListener('wishlistUpdated', handleWishlistUpdate);
+    window.addEventListener('storage', handleWishlistUpdate);
+
+    return () => {
+      window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
+      window.removeEventListener('storage', handleWishlistUpdate);
+    };
+  }, [product.id]);
+
+  // Toggle wishlist
+  const handleToggleWishlist = () => {
+    const savedWishlist = localStorage.getItem('wishlist');
+    let wishlist: Product[] = [];
+
+    if (savedWishlist) {
+      try {
+        wishlist = JSON.parse(savedWishlist);
+      } catch (error) {
+        wishlist = [];
+      }
+    }
+
+    const isInWishlist = wishlist.some((item) => item.id === product.id);
+
+    if (isInWishlist) {
+      // Xóa khỏi wishlist
+      wishlist = wishlist.filter((item) => item.id !== product.id);
+      setIsWishlisted(false);
+    } else {
+      // Thêm vào wishlist
+      wishlist.push(product);
+      setIsWishlisted(true);
+    }
+
+    // Lưu vào localStorage
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+
+    // Dispatch event để update header
+    window.dispatchEvent(new Event('wishlistUpdated'));
+  };
 
   return (
     <div
@@ -38,7 +96,7 @@ export default function ProductCard({
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           onError={() => setImageError(true)}
-          loading="lazy" // Tối ưu hiệu năng
+          loading="lazy"
         />
 
         {/* Badge góc trên trái */}
@@ -62,11 +120,11 @@ export default function ProductCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onToggleWishlist(product);
+            handleToggleWishlist();
           }}
           className={`absolute bottom-3 right-3 p-2.5 rounded-full shadow-lg transition-all ${
             isWishlisted
-              ? 'bg-red-500 text-white'
+              ? 'bg-red-500 text-white scale-110'
               : 'bg-white text-gray-600 hover:bg-red-50 hover:text-red-500'
           }`}
           aria-label={isWishlisted ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
@@ -77,7 +135,7 @@ export default function ProductCard({
 
       {/* NỘI DUNG */}
       <div className="p-4 flex flex-col flex-grow">
-        {/* Tên sản phẩm */}
+        {/* Tên sản phẩm - CỐ ĐỊNH CHIỀU CAO */}
         <h3 className="font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors h-12 text-sm leading-tight">
           {product.name}
         </h3>
@@ -94,10 +152,10 @@ export default function ProductCard({
           </span>
         </div>
 
-        {/* Mô tả ngắn */}
-        <div className="mb-3 h-10">
+        {/* Mô tả ngắn - CỐ ĐỊNH CHIỀU CAO */}
+        <div className="mb-3 h-10 flex-shrink-0">
           {product.description ? (
-            <p className="text-gray-600 text-sm leading-relaxed line-clamp-2">
+            <p className="text-gray-600 text-xs leading-relaxed line-clamp-2">
               {product.description}
             </p>
           ) : (
@@ -156,23 +214,21 @@ export default function ProductCard({
           </a>
         </div>
 
-        {/* THÔNG SỐ KỸ THUẬT NỔI BẬT */}
-        <div className="pt-3 border-t border-gray-100">
-          {product.specs && product.specs.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2 text-sm min-h-12">
+        {/* THÔNG SỐ KỸ THUẬT NỔI BẬT - ẨN TRÊN MOBILE */}
+        <div className="hidden md:block pt-3 border-t border-gray-100 h-20 flex-shrink-0">
+          {product.specs && product.specs.length > 0 && (
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2">
               {product.specs.slice(0, 2).map((spec, index) => (
-                <div key={index} className="flex flex-col justify-start">
-                  <span className="text-gray-500 text-xs font-medium">
+                <div key={index} className="flex flex-col justify-start overflow-hidden">
+                  <span className="text-gray-500 text-xs font-medium mb-0.5 whitespace-nowrap">
                     {spec.label}:
                   </span>
-                  <span className="text-gray-700 font-medium text-sm leading-snug line-clamp-2">
+                  <span className="text-gray-700 font-semibold text-xs leading-tight line-clamp-2 break-words">
                     {spec.value}
                   </span>
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="h-12" />
           )}
         </div>
       </div>

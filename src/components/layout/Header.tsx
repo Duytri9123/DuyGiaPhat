@@ -1,7 +1,7 @@
 // src/components/layout/Header.tsx
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Search, Phone, ChevronDown } from "lucide-react";
+import { Menu, X, Search, Phone, ChevronDown, Heart } from "lucide-react";
 import { categories } from "../../data/categories";
 import { mockProducts } from "../../data/mockData";
 import logo from "../../assets/logo.jpg";
@@ -13,6 +13,11 @@ export default function Header() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchQueryMobile, setSearchQueryMobile] = useState("");
   const [showSuggestionsMobile, setShowSuggestionsMobile] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  
+  // State cho ẩn/hiện header
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,6 +29,59 @@ export default function Header() {
     { label: "Sản phẩm", path: "/san-pham" },
     { label: "Giới thiệu", path: "/gioi-thieu" },
   ];
+
+  // Load wishlist count từ localStorage
+  useEffect(() => {
+    const loadWishlistCount = () => {
+      const savedWishlist = localStorage.getItem('wishlist');
+      if (savedWishlist) {
+        try {
+          const wishlist = JSON.parse(savedWishlist);
+          setWishlistCount(wishlist.length);
+        } catch (error) {
+          setWishlistCount(0);
+        }
+      }
+    };
+
+    // Load ban đầu
+    loadWishlistCount();
+
+    // Listen storage event để update khi có thay đổi
+    const handleStorageChange = () => {
+      loadWishlistCount();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Custom event để update trong cùng tab
+    window.addEventListener('wishlistUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('wishlistUpdated', handleStorageChange);
+    };
+  }, []);
+
+  // Xử lý ẩn/hiện header khi scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < 50) {
+        setIsHeaderVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        setIsHeaderVisible(false);
+      } else {
+        setIsHeaderVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   // Lọc sản phẩm gợi ý - Desktop
   const suggestions = searchQuery.trim()
@@ -108,7 +166,9 @@ export default function Header() {
   return (
     <>
       {/* Header chính */}
-      <header className="bg-white shadow-md sticky top-0 z-50 border-b border-gray-100">
+      <header className={`bg-white shadow-md fixed top-0 left-0 right-0 z-50 border-b border-gray-100 transition-transform duration-300 ${
+        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-20 gap-4">
             {/* Logo */}
@@ -256,6 +316,27 @@ export default function Header() {
                 )}
               </div>
 
+              {/* Icon Yêu thích với badge đếm */}
+              <Link
+                to="/yeu-thich"
+                className="relative p-2.5 rounded-full hover:bg-red-50 transition-all group"
+                aria-label="Sản phẩm yêu thích"
+              >
+                <Heart 
+                  size={22} 
+                  className={`transition-colors ${
+                    isActive('/yeu-thich')
+                      ? 'text-red-500 fill-current'
+                      : 'text-gray-600 group-hover:text-red-500'
+                  }`}
+                />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                    {wishlistCount > 9 ? '9+' : wishlistCount}
+                  </span>
+                )}
+              </Link>
+
               {/* Hotline */}
               <a
                 href="tel:0976707297"
@@ -266,8 +347,29 @@ export default function Header() {
               </a>
             </div>
 
-            {/* Mobile: Menu button */}
+            {/* Mobile: Wishlist + Menu button */}
             <div className="flex lg:hidden items-center gap-2">
+              {/* Icon Yêu thích Mobile */}
+              <Link
+                to="/yeu-thich"
+                className="relative p-2 rounded-full hover:bg-red-50 transition-all"
+                aria-label="Sản phẩm yêu thích"
+              >
+                <Heart 
+                  size={22} 
+                  className={`transition-colors ${
+                    isActive('/yeu-thich')
+                      ? 'text-red-500 fill-current'
+                      : 'text-gray-600'
+                  }`}
+                />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                    {wishlistCount > 9 ? '9+' : wishlistCount}
+                  </span>
+                )}
+              </Link>
+
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
@@ -278,6 +380,9 @@ export default function Header() {
           </div>
         </div>
       </header>
+
+      {/* Spacer để content không bị che bởi fixed header */}
+      <div className="h-20"></div>
 
       {/* Mobile Sidebar */}
       {sidebarOpen && (
@@ -388,6 +493,27 @@ export default function Header() {
                   {item.label}
                 </Link>
               ))}
+
+              {/* Link Yêu thích trong sidebar */}
+              <Link
+                to="/yeu-thich"
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center justify-between py-3 px-4 rounded-lg transition text-base font-medium ${
+                  isActive('/yeu-thich')
+                    ? "bg-blue-100 text-blue-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <Heart size={18} className={isActive('/yeu-thich') ? 'fill-current' : ''} />
+                  Yêu thích
+                </span>
+                {wishlistCount > 0 && (
+                  <span className="bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                    {wishlistCount > 9 ? '9+' : wishlistCount}
+                  </span>
+                )}
+              </Link>
 
               {/* Toggle Danh mục */}
               <div className="border-t pt-3 mt-3">

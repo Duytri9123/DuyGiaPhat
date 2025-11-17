@@ -6,6 +6,7 @@ import ProductCard from "../components/common/ProductCard";
 import { Phone, Shield, Truck, Wrench, Award, ChevronRight, Zap, ArrowRight, CheckCircle } from "lucide-react";
 import AMB_headerbanner from "../assets/AMB_headerbanner.jpg";
 import banner from "../assets/banner.jpg";
+
 export default function Home() {
   const navigate = useNavigate();
 
@@ -204,7 +205,6 @@ export default function Home() {
               <ProductCard
                 key={product.id}
                 product={product}
-                onToggleWishlist={() => { }}
                 onClick={() => navigate(`/san-pham/${product.id}`)}
               />
             ))}

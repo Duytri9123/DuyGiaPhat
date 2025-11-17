@@ -7,19 +7,20 @@ import Products from "./pages/Products";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetail from "./pages/ProductDetail";
 import About from "./pages/About";
+import WishlistPage from "./pages/WishlistPage";
 
 function App() {
   return (
     <Routes>
       {/* Tất cả trang dùng chung Layout (Header + Footer) */}
-      <Route element={<Layout/>}>
+      <Route element={<Layout />}>
         {/* Trang chủ */}
         <Route path="/" element={<Home />} />
 
         {/* Danh sách sản phẩm (tất cả + tìm kiếm) */}
         <Route path="/san-pham" element={<Products />} />
         <Route path="/tim-kiem" element={<Products />} />
-
+        <Route path="/yeu-thich" element={<WishlistPage />} />
         {/* Danh mục sản phẩm */}
         <Route path="/danh-muc/:category" element={<CategoryPage />} />
 
