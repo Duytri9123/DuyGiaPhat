@@ -1,6 +1,6 @@
 // src/components/common/ProductCard.tsx
-import { Heart, Star, Phone, Minus } from 'lucide-react';
-import { type Product } from '../../data/mockData';
+import { Heart, Star, Minus } from 'lucide-react';
+import type { Product } from '../../data/mockData';
 import { useState, useEffect } from 'react';
 import type React from 'react';
 
@@ -19,7 +19,6 @@ export default function ProductCard({
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [inCart, setInCart] = useState(false);
 
-  // Ảnh fallback
   const fallbackImage =
     'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop';
 
@@ -29,20 +28,23 @@ export default function ProductCard({
   useEffect(() => {
     const checkWishlist = () => {
       const savedWishlist = localStorage.getItem('wishlist');
-      if (savedWishlist) {
-        try {
-          const wishlist = JSON.parse(savedWishlist);
-          const isInWishlist = wishlist.some((item: Product) => item.id === product.id);
-          setIsWishlisted(isInWishlist);
-        } catch (error) {
-          console.error('Error checking wishlist:', error);
-        }
+      if (!savedWishlist) {
+        setIsWishlisted(false);
+        return;
+      }
+
+      try {
+        const wishlist: Product[] = JSON.parse(savedWishlist);
+        const exists = wishlist.some((item) => item.id === product.id);
+        setIsWishlisted(exists);
+      } catch (error) {
+        console.error('Error checking wishlist:', error);
+        setIsWishlisted(false);
       }
     };
 
     checkWishlist();
 
-    // Listen cho wishlist updates
     const handleWishlistUpdate = () => {
       checkWishlist();
     };
@@ -60,15 +62,17 @@ export default function ProductCard({
   useEffect(() => {
     const checkCart = () => {
       const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        try {
-          const cart = JSON.parse(savedCart);
-          const isInCart = Array.isArray(cart) && cart.some((item: Product) => item.id === product.id);
-          setInCart(isInCart);
-        } catch (error) {
-          console.error('Error checking cart:', error);
-        }
-      } else {
+      if (!savedCart) {
+        setInCart(false);
+        return;
+      }
+
+      try {
+        const cart: Product[] = JSON.parse(savedCart);
+        const exists = Array.isArray(cart) && cart.some((item) => item.id === product.id);
+        setInCart(exists);
+      } catch (error) {
+        console.error('Error checking cart:', error);
         setInCart(false);
       }
     };
@@ -95,36 +99,31 @@ export default function ProductCard({
 
     if (savedWishlist) {
       try {
-        wishlist = JSON.parse(savedWishlist);
+        wishlist = JSON.parse(savedWishlist) as Product[];
       } catch (error) {
         wishlist = [];
       }
     }
 
-    const isInWishlist = wishlist.some((item) => item.id === product.id);
+    const exists = wishlist.some((item) => item.id === product.id);
 
-    if (isInWishlist) {
-      // Xóa khỏi wishlist
+    if (exists) {
       wishlist = wishlist.filter((item) => item.id !== product.id);
       setIsWishlisted(false);
     } else {
-      // Thêm vào wishlist
       wishlist.push(product);
       setIsWishlisted(true);
     }
 
-    // Lưu vào localStorage
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
-
-    // Dispatch event để update header
     window.dispatchEvent(new Event('wishlistUpdated'));
 
-    // Callback bên ngoài nếu cần
     if (onToggleWishlist) {
       onToggleWishlist();
     }
   };
 
+  // Toggle giỏ hàng
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
@@ -135,7 +134,7 @@ export default function ProductCard({
       try {
         const parsed = JSON.parse(savedCart);
         if (Array.isArray(parsed)) {
-          cart = parsed;
+          cart = parsed as Product[];
         }
       } catch (error) {
         cart = [];
@@ -218,7 +217,7 @@ export default function ProductCard({
               {product.description}
             </p>
           ) : (
-            <div className="h-full"></div>
+            <div className="h-full" />
           )}
         </div>
 
@@ -239,10 +238,27 @@ export default function ProductCard({
         </div>
 
         {/* Spacer đẩy nút xuống dưới */}
-        <div className="flex-grow"></div>
+        <div className="flex-grow" />
 
-        {/* NÚT YÊUTHÍCH + GIỎ HÀNG */}
+        {/* NÚT YÊU THÍCH + GIỎ HÀNG */}
         <div className="flex gap-2">
+          {/* Nút yêu thích */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleWishlist();
+            }}
+            className={`flex-1 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all text-sm border-2 ${
+              isWishlisted
+                ? 'bg-red-500 text-white border-red-500 hover:bg-red-600'
+                : 'bg-white text-red-500 border-red-500 hover:bg-red-50'
+            }`}
+            aria-label={isWishlisted ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
+          >
+            <Heart size={16} className={isWishlisted ? 'fill-current' : ''} />
+            <span className="hidden sm:inline">Yêu thích</span>
+          </button>
+
           {/* Nút giỏ hàng */}
           <button
             onClick={handleAddToCart}
@@ -256,37 +272,18 @@ export default function ProductCard({
             {inCart ? (
               <span className="relative inline-flex items-center justify-center">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2-2-2z"/>
+                  <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2-2-2z" />
                 </svg>
-                <span className="absolute -top-1 -right-1 bg-amber-500 text-white rounded-full p-[1px] flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-amber-500 text-white rounded-full p-px flex items-center justify-center">
                   <Minus className="w-2.5 h-2.5" />
                 </span>
               </span>
             ) : (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2-2-2z"/>
+                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2-2-2z" />
               </svg>
             )}
-            <span className="hidden sm:inline">
-              {inCart ? 'Loại bỏ' : 'Thêm vào'}
-            </span>
-          </button>
-              inCart
-                ? 'bg-white text-amber-600 border-amber-500 hover:bg-amber-50'
-                : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500'
-            }`}
-            aria-label={inCart ? 'Bỏ khỏi giỏ hàng' : 'Thêm vào giỏ hàng'}
-          >
-            {inCart ? (
-              <Minus className="w-4 h-4" />
-            ) : (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
-              </svg>
-            )}
-            <span className="hidden sm:inline">
-              {inCart ? 'Loại bỏ' : 'Thêm vào'}
-            </span>
+            <span className="hidden sm:inline">{inCart ? 'Loại bỏ' : 'Thêm vào'}</span>
           </button>
         </div>
 
