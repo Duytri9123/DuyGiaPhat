@@ -1,5 +1,5 @@
 // src/components/common/ProductCard.tsx
-import { Heart, Star, Phone } from 'lucide-react';
+import { Heart, Star, Phone, Minus } from 'lucide-react';
 import { type Product } from '../../data/mockData';
 import { useState, useEffect } from 'react';
 import type React from 'react';
@@ -17,6 +17,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [inCart, setInCart] = useState(false);
 
   // Ảnh fallback
   const fallbackImage =
@@ -52,6 +53,38 @@ export default function ProductCard({
     return () => {
       window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
       window.removeEventListener('storage', handleWishlistUpdate);
+    };
+  }, [product.id]);
+
+  // Kiểm tra sản phẩm có trong giỏ hàng không
+  useEffect(() => {
+    const checkCart = () => {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        try {
+          const cart = JSON.parse(savedCart);
+          const isInCart = Array.isArray(cart) && cart.some((item: Product) => item.id === product.id);
+          setInCart(isInCart);
+        } catch (error) {
+          console.error('Error checking cart:', error);
+        }
+      } else {
+        setInCart(false);
+      }
+    };
+
+    checkCart();
+
+    const handleCartUpdate = () => {
+      checkCart();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    window.addEventListener('storage', handleCartUpdate);
+
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+      window.removeEventListener('storage', handleCartUpdate);
     };
   }, [product.id]);
 
@@ -109,15 +142,20 @@ export default function ProductCard({
       }
     }
 
-    const existingItem = cart.find((item) => item.id === product.id);
+    const existingIndex = cart.findIndex((item) => item.id === product.id);
 
-    if (!existingItem) {
+    if (existingIndex >= 0) {
+      // Đã có trong giỏ -> xoá khỏi giỏ
+      cart.splice(existingIndex, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      window.dispatchEvent(new Event('cartUpdated'));
+      setInCart(false);
+    } else {
+      // Chưa có -> thêm vào giỏ
       cart.push(product);
       localStorage.setItem('cart', JSON.stringify(cart));
       window.dispatchEvent(new Event('cartUpdated'));
-      alert(`✅ Đã thêm "${product.name}" vào giỏ hàng!`);
-    } else {
-      alert(`ℹ️ Sản phẩm này đã có trong giỏ hàng!`);
+      setInCart(true);
     }
   };
 
@@ -205,33 +243,50 @@ export default function ProductCard({
 
         {/* NÚT YÊUTHÍCH + GIỎ HÀNG */}
         <div className="flex gap-2">
-          {/* Nút yêu thích */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleToggleWishlist();
-            }}
-            className={`flex-1 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all text-sm border-2 ${
-              isWishlisted
-                ? 'bg-red-500 text-white border-red-500 hover:bg-red-600'
-                : 'bg-white text-red-500 border-red-500 hover:bg-red-50'
-            }`}
-            aria-label={isWishlisted ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
-          >
-            <Heart size={16} className={isWishlisted ? 'fill-current' : ''} />
-            <span className="hidden sm:inline">Yêu thích</span>
-          </button>
-
           {/* Nút giỏ hàng */}
           <button
             onClick={handleAddToCart}
-            className="flex-1 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium flex items-center justify-center gap-2 transition-all text-sm"
-            aria-label="Thêm vào giỏ hàng"
+            className={`flex-1 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all text-sm border-2 ${
+              inCart
+                ? 'bg-white text-amber-600 border-amber-500 hover:bg-amber-50'
+                : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500'
+            }`}
+            aria-label={inCart ? 'Bỏ khỏi giỏ hàng' : 'Thêm vào giỏ hàng'}
           >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
-            </svg>
-            <span className="hidden sm:inline">Giỏ hàng</span>
+            {inCart ? (
+              <span className="relative inline-flex items-center justify-center">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2-2-2z"/>
+                </svg>
+                <span className="absolute -top-1 -right-1 bg-amber-500 text-white rounded-full p-[1px] flex items-center justify-center">
+                  <Minus className="w-2.5 h-2.5" />
+                </span>
+              </span>
+            ) : (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2-2-2z"/>
+              </svg>
+            )}
+            <span className="hidden sm:inline">
+              {inCart ? 'Loại bỏ' : 'Thêm vào'}
+            </span>
+          </button>
+              inCart
+                ? 'bg-white text-amber-600 border-amber-500 hover:bg-amber-50'
+                : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500'
+            }`}
+            aria-label={inCart ? 'Bỏ khỏi giỏ hàng' : 'Thêm vào giỏ hàng'}
+          >
+            {inCart ? (
+              <Minus className="w-4 h-4" />
+            ) : (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+              </svg>
+            )}
+            <span className="hidden sm:inline">
+              {inCart ? 'Loại bỏ' : 'Thêm vào'}
+            </span>
           </button>
         </div>
 

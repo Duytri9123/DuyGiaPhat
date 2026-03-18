@@ -1,6 +1,6 @@
 // src/components/layout/Layout.tsx
 import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { ChevronUp } from "lucide-react";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -8,6 +8,7 @@ import zaloIcon from "../../assets/icons8-zalo.svg";
 
 export default function Layout() {
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const location = useLocation();
 
   // Theo dõi scroll để hiện/ẩn nút Back to Top
   useEffect(() => {
@@ -30,6 +31,11 @@ export default function Layout() {
       behavior: "smooth",
     });
   };
+
+  // Tự động cuộn lên đầu mỗi khi đổi route
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location.pathname]);
 
   return (
     <>

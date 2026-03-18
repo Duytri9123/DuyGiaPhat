@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { mockProducts, mockNews } from "../data/mockData";
 import {
@@ -17,9 +17,32 @@ export default function ProductDetail() {
   const [zoomLevel, setZoomLevel] = useState(100);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [inCart, setInCart] = useState(false);
 
   const productId = parseInt(id || "0");
   const product = mockProducts.find((p) => p.id === productId);
+
+  // Kiểm tra sản phẩm đã có trong giỏ hàng chưa
+  useEffect(() => {
+    if (!product) return;
+
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      try {
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed)) {
+          const exists = parsed.some((item: typeof mockProducts[0]) => item.id === product.id);
+          setInCart(exists);
+        } else {
+          setInCart(false);
+        }
+      } catch (error) {
+        setInCart(false);
+      }
+    } else {
+      setInCart(false);
+    }
+  }, [product]);
 
   const productUrl = `https://duy-gia-phat.vercel.app/san-pham/${productId}`;
   const productTitle = product?.name || 'Sản phẩm điện công nghiệp';
@@ -70,6 +93,8 @@ export default function ProductDetail() {
     .slice(0, 4);
 
   const handleAddToCart = () => {
+    if (!product) return;
+
     const savedCart = localStorage.getItem('cart');
     let cart: typeof mockProducts = [];
 
@@ -84,15 +109,20 @@ export default function ProductDetail() {
       }
     }
 
-    const existingItem = cart.find((item) => item.id === product.id);
-    
-    if (!existingItem) {
+    const existingIndex = cart.findIndex((item) => item.id === product.id);
+
+    if (existingIndex >= 0) {
+      // Đã có trong giỏ -> xoá khỏi giỏ
+      cart.splice(existingIndex, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      window.dispatchEvent(new Event('cartUpdated'));
+      setInCart(false);
+    } else {
+      // Chưa có -> thêm vào giỏ
       cart.push(product);
       localStorage.setItem('cart', JSON.stringify(cart));
       window.dispatchEvent(new Event('cartUpdated'));
-      alert(`✅ Đã thêm "${product.name}" vào giỏ hàng!`);
-    } else {
-      alert(`ℹ️ Sản phẩm này đã có trong giỏ hàng!`);
+      setInCart(true);
     }
   };
 
@@ -127,9 +157,9 @@ export default function ProductDetail() {
                 </span>
               )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
-                <div className="bg-white/90 rounded-full p-3 group-hover:scale-110 transition-transform">
+                {/* <div className="bg-white/90 rounded-full p-3 group-hover:scale-110 transition-transform">
                   <ZoomIn size={24} className="text-gray-900" />
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -174,7 +204,7 @@ export default function ProductDetail() {
             </p>
 
             {/* Key Specs Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
               {product.specs?.slice(0, 4).map((spec, idx) => {
                 const getSpecIcon = () => {
                   const label = spec.label.toLowerCase();
@@ -199,10 +229,23 @@ export default function ProductDetail() {
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={handleAddToCart}
-                className="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className={`flex-1 flex items-center justify-center gap-2 font-bold py-4 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl border-2 ${
+                  inCart
+                    ? "bg-white text-amber-600 border-amber-500 hover:bg-amber-50"
+                    : "bg-amber-500 hover:bg-amber-600 text-white border-amber-500"
+                }`}
               >
-                <ShoppingCart size={20} />
-                THÊM VÀO GIỎ HÀNG
+                {inCart ? (
+                  <span className="relative inline-flex items-center justify-center">
+                    <ShoppingCart size={20} />
+                    <span className="absolute -top-1 -right-1 bg-amber-500 text-white rounded-full p-[2px] flex items-center justify-center">
+                      <Minus className="w-3 h-3" />
+                    </span>
+                  </span>
+                ) : (
+                  <ShoppingCart size={20} />
+                )}
+                <span>{inCart ? "Loại bỏ" : "Thêm vào"}</span>
               </button>
               <a
                 href="tel:0976707297"

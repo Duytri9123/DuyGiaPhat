@@ -15,11 +15,11 @@ export default function NewsPage() {
     <main className="min-h-screen bg-gray-100 pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-slate-500 mb-8">
+        <nav className="flex items-center gap-2 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.08em] sm:tracking-[0.15em] text-slate-500 mb-8">
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="cursor-pointer hover:text-amber-500"
+            className="cursor-pointer hover:text-amber-500 whitespace-nowrap"
           >
             Trang chủ
           </button>
@@ -27,7 +27,7 @@ export default function NewsPage() {
           <button
             type="button"
             onClick={() => navigate("/tin-tuc")}
-            className="cursor-pointer hover:text-amber-500"
+            className="cursor-pointer hover:text-amber-500 whitespace-nowrap"
           >
             Tin tức
           </button>

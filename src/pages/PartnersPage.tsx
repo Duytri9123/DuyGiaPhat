@@ -7,7 +7,7 @@ export default function PartnersPage() {
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Đối Tác Chiến Lược</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Đối Tác Chiến Lược</h1>
           <p className="text-gray-600 max-w-2xl mx-auto text-lg">
             Duy Gia Phát hợp tác với các thương hiệu hàng đầu thế giới để cung cấp giải pháp điện tốt nhất cho khách hàng Việt Nam.
           </p>
@@ -20,7 +20,7 @@ export default function PartnersPage() {
             <div key={partner.id} className="bg-white rounded-xl p-8 border border-gray-200 hover:shadow-lg transition-all duration-300 group">
               {/* Logo Area */}
               <div className="h-24 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg mb-6 group-hover:from-amber-50 group-hover:to-amber-100 transition">
-                <p className="text-2xl font-bold text-gray-700 group-hover:text-amber-600 transition">
+                <p className="text-xl md:text-2xl font-bold text-gray-700 group-hover:text-amber-600 transition">
                   {partner.logo}
                 </p>
               </div>

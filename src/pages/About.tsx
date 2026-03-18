@@ -36,10 +36,10 @@ export default function About() {
             <span className="inline-block bg-amber-400 text-slate-900 px-3 py-1 text-[11px] font-black tracking-[0.25em] uppercase rounded-sm mb-5">
               KỸ THUẬT CHÍNH XÁC
             </span>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight mb-6 uppercase">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight mb-4 sm:mb-6 uppercase">
               VỀ <span className="text-amber-400">DUY GIA PHÁT</span>
             </h1>
-            <p className="text-base md:text-xl text-slate-100/90 leading-relaxed max-w-xl font-light">
+            <p className="text-sm md:text-lg text-slate-100/90 leading-relaxed max-w-xl font-light">
               Tiên phong trong lĩnh vực kỹ thuật điện công nghiệp và giải pháp năng lượng. Chúng tôi kiến tạo
               nền tảng vững chắc cho sự vận hành ổn định của mọi hệ thống sản xuất hiện đại.
             </p>
@@ -52,7 +52,7 @@ export default function About() {
             <p className="text-xs font-black tracking-[0.3em] text-amber-500 uppercase mb-3">
               LỊCH SỬ HÌNH THÀNH
             </p>
-            <h2 className="text-3xl md:text-4xl font-black text-slate-800 mb-8 uppercase tracking-tight">
+            <h2 className="text-2xl md:text-4xl font-black text-slate-800 mb-6 md:mb-8 uppercase tracking-tight">
               HÀNH TRÌNH PHÁT TRIỂN
             </h2>
             <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-200">
@@ -78,7 +78,7 @@ export default function About() {
               />
             </div>
             <div className="absolute -bottom-8 -left-6 bg-amber-400 px-8 py-6 rounded-xl shadow-2xl hidden md:block">
-              <p className="text-4xl font-black text-slate-900 leading-none mb-1">15+</p>
+              <p className="text-3xl lg:text-4xl font-black text-slate-900 leading-none mb-1">15+</p>
               <p className="text-[11px] font-bold tracking-[0.25em] text-slate-900/80 uppercase">
                 NĂM KINH NGHIỆM
               </p>
@@ -97,8 +97,8 @@ export default function About() {
                   className="bg-white/5 border border-white/10 rounded-2xl p-9 backdrop-blur-sm hover:border-amber-400/60 transition-colors group"
                 >
                   <Icon className="w-12 h-12 text-amber-400 mb-6 group-hover:scale-110 transition-transform duration-300" />
-                  <h3 className="text-2xl md:text-3xl font-black mb-4 uppercase tracking-tight">{item.title}</h3>
-                  <p className="text-slate-300 text-base md:text-lg leading-relaxed">{item.description}</p>
+                  <h3 className="text-xl md:text-3xl font-black mb-3 md:mb-4 uppercase tracking-tight">{item.title}</h3>
+                  <p className="text-slate-300 text-sm md:text-lg leading-relaxed">{item.description}</p>
                 </div>
               );
             })}
@@ -111,7 +111,7 @@ export default function About() {
             <p className="text-xs font-black tracking-[0.3em] text-amber-500 uppercase mb-3">
               BẢN SẮC DOANH NGHIỆP
             </p>
-            <h2 className="text-3xl md:text-4xl font-black text-slate-800 uppercase tracking-tight">
+            <h2 className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-tight">
               GIÁ TRỊ CỐT LÕI
             </h2>
           </div>
@@ -152,7 +152,7 @@ export default function About() {
                   <p className="text-[11px] font-black tracking-[0.26em] text-amber-300 uppercase mb-1">
                     XƯỞNG SẢN XUẤT
                   </p>
-                  <p className="text-lg md:text-xl font-bold">
+                  <p className="text-base md:text-xl font-bold">
                     Quy mô 5000m² đạt chuẩn ISO
                   </p>
                 </div>
@@ -162,10 +162,10 @@ export default function About() {
               <p className="text-xs font-black tracking-[0.3em] text-amber-500 uppercase mb-3">
                 CÔNG SUẤT VẬN HÀNH
               </p>
-              <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-5 uppercase tracking-tight">
+              <h2 className="text-2xl md:text-4xl font-black text-slate-900 mb-4 md:mb-5 uppercase tracking-tight">
                 NĂNG LỰC SẢN XUẤT
               </h2>
-              <p className="text-slate-600 text-base md:text-lg leading-relaxed mb-7">
+              <p className="text-slate-600 text-sm md:text-lg leading-relaxed mb-6 md:mb-7">
                 Duy Gia Phát sở hữu hệ thống máy móc gia công cơ khí chính xác CNC, phòng thí nghiệm điện hiện
                 đại và đội ngũ kỹ sư, công nhân lành nghề.
               </p>
@@ -194,7 +194,7 @@ export default function About() {
                     : "bg-white text-slate-900"
                 }`}
               >
-                <p className="text-3xl font-black mb-1">{stat.value}</p>
+                <p className="text-2xl md:text-3xl font-black mb-1">{stat.value}</p>
                 <p className="text-[11px] font-black tracking-[0.25em] uppercase opacity-80">
                   {stat.label}
                 </p>
@@ -210,7 +210,7 @@ export default function About() {
               <p className="text-xs font-black tracking-[0.3em] text-amber-500 uppercase mb-3">
                 ĐỒNG HÀNH CÙNG THÀNH CÔNG
               </p>
-              <h2 className="text-3xl md:text-4xl font-black text-slate-900 uppercase tracking-tight">
+              <h2 className="text-2xl md:text-4xl font-black text-slate-900 uppercase tracking-tight">
                 ĐỐI TÁC & CHỨNG CHỈ
               </h2>
             </div>
@@ -233,7 +233,7 @@ export default function About() {
                 key={partner.id}
                 className="flex justify-center grayscale hover:grayscale-0 transition-all duration-300"
               >
-                <span className="text-xl font-black text-slate-400 tracking-wide">{partner.name}</span>
+                <span className="text-base sm:text-lg md:text-xl font-black text-slate-400 tracking-wide">{partner.name}</span>
               </div>
             ))}
           </div>
@@ -259,22 +259,22 @@ export default function About() {
                 </div>
                 <div>
                   <p className="font-semibold text-slate-900">{item.label}</p>
-                  <p className="text-lg text-slate-700">{item.value}</p>
+                  <p className="text-base md:text-lg text-slate-700">{item.value}</p>
                 </div>
               </a>
             ))}
           </div>
 
           <div className="bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 rounded-3xl shadow-2xl p-8 md:p-10 text-white flex flex-col justify-center">
-            <h2 className="text-3xl md:text-4xl font-black mb-4">Cần tư vấn giải pháp?</h2>
-            <p className="text-base md:text-lg mb-7 text-amber-50">
+            <h2 className="text-2xl md:text-4xl font-black mb-3 md:mb-4">Cần tư vấn giải pháp?</h2>
+            <p className="text-sm md:text-lg mb-6 md:mb-7 text-amber-50">
               Đội kỹ thuật sẽ liên hệ trong vài phút để báo giá chi tiết và đề xuất cấu hình tủ điện tối ưu cho dự
               án của bạn.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a
                 href="tel:0976707297"
-                className="flex-1 bg-white text-slate-900 py-4 rounded-2xl font-bold text-lg md:text-xl flex items-center justify-center gap-3 hover:bg-amber-50 transition shadow-xl"
+                className="flex-1 bg-white text-slate-900 py-3 md:py-4 rounded-2xl font-bold text-base md:text-xl flex items-center justify-center gap-3 hover:bg-amber-50 transition shadow-xl"
               >
                 <Phone className="w-6 h-6" />
                 <span> 0976 707 297</span>
@@ -283,7 +283,7 @@ export default function About() {
                 href="https://zalo.me/0976707297"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 bg-slate-900/90 py-4 rounded-2xl font-bold text-lg md:text-xl flex items-center justify-center gap-3 hover:bg-slate-900 transition shadow-xl"
+                className="flex-1 bg-slate-900/90 py-3 md:py-4 rounded-2xl font-bold text-base md:text-xl flex items-center justify-center gap-3 hover:bg-slate-900 transition shadow-xl"
               >
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-900 font-black text-xs">
                   Z

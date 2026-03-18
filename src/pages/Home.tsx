@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { mockProducts, mockPartners, mockNews, mockProjects } from "../data/mockData";
 import { categories } from "../data/categories";
-import { ChevronRight, CheckCircle, Heart, BadgeCheck, Truck, Headphones, Zap, Globe, Calendar, Clock, Tag, Phone } from "lucide-react";
+import { ChevronRight, CheckCircle, Heart, BadgeCheck, Truck, Headphones, Zap, Globe, Calendar, Clock, Tag, Phone, Minus } from "lucide-react";
 import AMB_headerbanner from "../assets/AMB_headerbanner.jpg";
 import { CategoryIcon } from "../components/common/CategoryIcons";
 
@@ -30,6 +30,8 @@ export default function Home() {
 
   // State cho wishlist
   const [wishlisted, setWishlisted] = useState<{[key: number]: boolean}>({});
+  // State cho sản phẩm đã trong giỏ hàng
+  const [inCartMap, setInCartMap] = useState<{[key: number]: boolean}>({});
 
   // Load wishlist từ localStorage
   useEffect(() => {
@@ -58,6 +60,42 @@ export default function Home() {
     window.addEventListener('wishlistUpdated', handleWishlistUpdate);
     return () => {
       window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
+    };
+  }, []);
+
+  // Load trạng thái giỏ hàng từ localStorage
+  useEffect(() => {
+    const loadCart = () => {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        try {
+          const cart = JSON.parse(savedCart);
+          const cartMap: { [key: number]: boolean } = {};
+          if (Array.isArray(cart)) {
+            cart.forEach((item: any) => {
+              if (item && typeof item.id === 'number') {
+                cartMap[item.id] = true;
+              }
+            });
+          }
+          setInCartMap(cartMap);
+        } catch (error) {
+          console.error('Error loading cart:', error);
+        }
+      } else {
+        setInCartMap({});
+      }
+    };
+
+    loadCart();
+
+    const handleCartUpdate = () => {
+      loadCart();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
     };
   }, []);
 
@@ -125,7 +163,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Handle Add to Cart
+  // Handle Add/Remove Cart trực tiếp trên thẻ sản phẩm
   const handleAddToCart = (product: typeof mockProducts[0], e: React.MouseEvent) => {
     e.stopPropagation();
     
@@ -143,25 +181,28 @@ export default function Home() {
       }
     }
 
-    // Check if product already in cart
-    const existingItem = cart.find((item) => item.id === product.id);
-    
-    if (!existingItem) {
+    // Kiểm tra sản phẩm đã có trong giỏ chưa
+    const existingIndex = cart.findIndex((item) => item.id === product.id);
+
+    if (existingIndex >= 0) {
+      // Đã có trong giỏ -> xoá khỏi giỏ
+      cart.splice(existingIndex, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      window.dispatchEvent(new Event('cartUpdated'));
+      setInCartMap((prev) => ({ ...prev, [product.id]: false }));
+    } else {
+      // Chưa có -> thêm vào giỏ
       cart.push(product);
       localStorage.setItem('cart', JSON.stringify(cart));
       window.dispatchEvent(new Event('cartUpdated'));
-      
-      // Show toast notification
-      alert(`✅ Đã thêm "${product.name}" vào giỏ hàng!`);
-    } else {
-      alert(`ℹ️ Sản phẩm này đã có trong giỏ hàng!`);
+      setInCartMap((prev) => ({ ...prev, [product.id]: true }));
     }
   };
 
   return (
     <div className="min-h-screen bg-white pt-20 md:pt-32">
       {/* Hero Slider Banner */}
-      <section className="relative w-full bg-slate-900 overflow-hidden h-[500px]">
+      <section className="relative w-full bg-slate-900 overflow-hidden h-[420px] sm:h-[480px] md:h-[500px]">
         <div 
           className="absolute inset-0 opacity-60 bg-cover bg-center transition-all duration-500"
           style={{
@@ -178,7 +219,7 @@ export default function Home() {
           
           {/* Animated Title */}
           <h2 
-            className={`text-4xl md:text-6xl font-bold mb-6 max-w-2xl leading-tight transition-all duration-500 transform ${
+            className={`text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 max-w-2xl leading-tight transition-all duration-500 transform ${
               fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
@@ -186,25 +227,25 @@ export default function Home() {
           </h2>
           
           {/* Animated Subtitle */}
-          <p className={`text-lg text-slate-200 mb-8 max-w-xl transition-all duration-700 transform ${
+          <p className={`text-sm sm:text-lg text-slate-200 mb-6 sm:mb-8 max-w-xl transition-all duration-700 transform ${
             fadeIn ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
           }`}>
             Giải pháp tự động hóa toàn diện cho nhà máy, thiết kế chuẩn ISO, bền bỉ và hiệu suất tối ưu.
           </p>
           
           {/* CTA Buttons with stagger animation */}
-          <div className={`flex gap-4 transition-all duration-700 transform ${
+          <div className={`flex gap-3 sm:gap-4 transition-all duration-700 transform ${
             fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`} style={{ transitionDelay: '0.1s' }}>
             <button 
               onClick={() => navigate("/san-pham")}
-              className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-lg font-bold transition-all transform hover:scale-105 hover:shadow-xl"
+              className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 sm:px-8 sm:py-3 rounded-lg font-bold text-sm sm:text-base transition-all transform hover:scale-105 hover:shadow-xl"
             >
               Khám phá ngay
             </button>
             <button
               onClick={() => navigate("/lien-he")}
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 px-8 py-3 rounded-lg font-bold transition-all transform hover:scale-105 hover:shadow-lg"
+              className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 px-5 py-2.5 sm:px-8 sm:py-3 rounded-lg font-bold text-sm sm:text-base transition-all transform hover:scale-105 hover:shadow-lg"
             >
               Gửi yêu cầu tư vấn
             </button>
@@ -268,11 +309,11 @@ export default function Home() {
       <section className="bg-gray-50 py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900">Danh Mục Nổi Bật</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Danh Mục Nổi Bật</h2>
             <div className="h-1.5 w-24 bg-amber-500 mx-auto mt-2 rounded-full"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
             {categories.slice(0, 5).map((category) => (
               <div
                 key={category.id}
@@ -296,7 +337,7 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 py-20">
         <div className="flex justify-between items-end mb-10">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900">Sản Phẩm Bán Chạy</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Sản Phẩm Bán Chạy</h2>
             <div className="h-1.5 w-24 bg-amber-500 mt-2 rounded-full"></div>
           </div>
           <a 
@@ -358,14 +399,31 @@ export default function Home() {
 
                   {/* Nút giỏ hàng */}
                   <button 
-                    className="flex-1 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium flex items-center justify-center gap-2 transition-all text-sm hover:shadow-lg transform hover:scale-105"
+                    className={`flex-1 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all text-sm hover:shadow-lg transform hover:scale-105 border-2 ${
+                      inCartMap[product.id]
+                        ? 'bg-white text-amber-600 border-amber-500 hover:bg-amber-50'
+                        : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500'
+                    }`}
                     onClick={(e) => handleAddToCart(product, e)}
-                    aria-label="Thêm vào giỏ hàng"
+                    aria-label={inCartMap[product.id] ? 'Bỏ khỏi giỏ hàng' : 'Thêm vào giỏ hàng'}
                   >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
-                    </svg>
-                    <span className="hidden sm:inline">Giỏ hàng</span>
+                    {inCartMap[product.id] ? (
+                      <span className="relative inline-flex items-center justify-center">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                        </svg>
+                        <span className="absolute -top-1 -right-1 bg-amber-500 text-white rounded-full p-[1px] flex items-center justify-center">
+                          <Minus className="w-2.5 h-2.5" />
+                        </span>
+                      </span>
+                    ) : (
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                      </svg>
+                    )}
+                    <span className="hidden sm:inline">
+                      {inCartMap[product.id] ? 'Loại bỏ' : 'Thêm vào'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -386,7 +444,7 @@ export default function Home() {
             />
           </div>
           <div>
-            <h2 className="text-3xl font-bold mb-6 text-slate-900">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-slate-900">
               Giải Pháp Cơ Điện Toàn Diện
             </h2>
             <p className="text-slate-600 mb-8 leading-relaxed">
@@ -408,7 +466,7 @@ export default function Home() {
             </ul>
             <button
               onClick={() => navigate("/lien-he")}
-              className="bg-slate-900 text-white px-10 py-4 rounded-lg font-bold hover:opacity-90 transition-all inline-flex items-center gap-2"
+              className="bg-slate-900 text-white px-6 py-3 md:px-10 md:py-4 rounded-lg font-bold text-sm md:text-base hover:opacity-90 transition-all inline-flex items-center gap-2"
             >
               <Phone size={18} />
               Liên hệ tư vấn ngay
@@ -421,7 +479,7 @@ export default function Home() {
       <section className="bg-slate-900/5 py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Các Thương Hiệu Hợp Tác</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">Các Thương Hiệu Hợp Tác</h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
               Duy Gia Phát hợp tác với các nhà cung cấp hàng đầu thế giới để mang lại sản phẩm chất lượng cao nhất.
             </p>
@@ -435,7 +493,7 @@ export default function Home() {
                 className="bg-white rounded-lg p-6 flex items-center justify-center h-32 border border-slate-200 hover:border-amber-300 hover:shadow-md transition-all group cursor-pointer"
               >
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-slate-900 group-hover:text-amber-600 group-hover:scale-110 transition-all">
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 group-hover:text-amber-600 group-hover:scale-110 transition-all">
                     {partner.logo}
                   </p>
                 </div>
@@ -457,7 +515,7 @@ export default function Home() {
       {/* Featured Projects Section */}
       <section className="max-w-7xl mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-slate-900">Dự Án Tiêu Biểu</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Dự Án Tiêu Biểu</h2>
           <p className="text-slate-600 max-w-2xl mx-auto mt-3">
             Sự tin tưởng của các tập đoàn lớn là niềm chúc của Duy Gia Phát.
           </p>
@@ -514,7 +572,7 @@ export default function Home() {
       {/* News Section */}
       <section className="max-w-7xl mx-auto px-4 py-20">
         <div className="flex items-center justify-between mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Tin tức & Bài viết</h2>
+          <h2 className="text-2xl lg:text-4xl font-bold text-gray-900">Tin tức & Bài viết</h2>
           <a
             href="/tin-tuc"
             className="text-amber-600 font-semibold flex items-center gap-2 hover:gap-3 transition-all"
@@ -574,7 +632,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-slate-900 to-slate-800 py-24 overflow-hidden relative">
+      <section className="bg-gradient-to-r from-slate-900 to-slate-800 py-16 sm:py-20 md:py-24 overflow-hidden relative">
         {/* Animated Background decoration */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl -z-0 animate-pulse"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl -z-0 animate-pulse" style={{ animationDelay: '1s' }}></div>
@@ -589,12 +647,12 @@ export default function Home() {
 
         <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
           {/* Animated Title */}
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 animate-slideInDown">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4 sm:mb-6 animate-slideInDown">
             Bạn Cần Tư Vấn Giải Pháp Điện Công Nghiệp?
           </h2>
           
           {/* Animated Description */}
-          <p className="text-xl text-slate-200 mb-10 max-w-3xl mx-auto animate-fadeInScale" style={{ animationDelay: '0.2s' }}>
+          <p className="text-base sm:text-lg md:text-xl text-slate-200 mb-8 sm:mb-10 max-w-3xl mx-auto animate-fadeInScale" style={{ animationDelay: '0.2s' }}>
             Duy Gia Phát sẵn sàng hỗ trợ bạn với các giải pháp điện hàng đầu, tư vấn miễn phí từ các chuyên gia có chứng chỉ quốc tế.
           </p>
 
@@ -603,18 +661,18 @@ export default function Home() {
             {/* Phone Button */}
             <a
               href="tel:0976707297"
-              className="bg-amber-500 hover:bg-amber-600 text-white px-10 py-4 rounded-lg font-bold transition-all transform hover:scale-110 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl hover:shadow-amber-500/50 relative group overflow-hidden"
+              className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 md:px-10 md:py-4 rounded-lg font-bold text-sm sm:text-base transition-all transform hover:scale-110 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl hover:shadow-amber-500/50 relative group overflow-hidden"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform translate-x-full group-hover:translate-x-0 transition-all duration-700"></span>
-              <span className="text-2xl group-hover:animate-bounce">📞</span> 
+              <span className="text-xl sm:text-2xl group-hover:animate-bounce">📞</span> 
               <span className="relative">Gọi: 0976707297</span>
             </a>
 
             {/* Chat Zalo Button */}
-            <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border-2 border-white px-10 py-4 rounded-lg font-bold transition-all transform hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-white/10 relative group overflow-hidden">
+            <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border-2 border-white px-6 py-3 md:px-10 md:py-4 rounded-lg font-bold text-sm sm:text-base transition-all transform hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-white/10 relative group overflow-hidden">
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-10 transform -translate-x-full group-hover:translate-x-full transition-all duration-700"></span>
               <span className="flex items-center justify-center gap-2 relative">
-                <span className="text-2xl group-hover:rotate-12 transition-transform">💬</span> 
+                <span className="text-xl sm:text-2xl group-hover:rotate-12 transition-transform">💬</span> 
                 <span>Chat Zalo</span>
               </span>
             </button>

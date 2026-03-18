@@ -7,7 +7,7 @@ export default function ProjectsPage() {
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Dự Án Tiêu Biểu</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Dự Án Tiêu Biểu</h1>
           <p className="text-gray-600 max-w-2xl mx-auto text-lg">
             Sự tin tưởng của các tập đoàn lớn là minh chứng rõ nhất cho năng lực thi công và chất lượng sản phẩm của Duy Gia Phát.
           </p>

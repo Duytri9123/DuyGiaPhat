@@ -6,6 +6,7 @@ import logo from "../../assets/logo.png";
 
 export default function Header() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showMobileSearchBar, setShowMobileSearchBar] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchQueryMobile, setSearchQueryMobile] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -174,7 +175,7 @@ export default function Header() {
               <img
                 src={logo}
                 alt="Duy Gia Phát Logo"
-                className="h-18 w-auto hover:scale-105 transition-transform"
+                className="h-12 sm:h-16 md:h-18 w-auto hover:scale-105 transition-transform"
               />
             </Link>
 
@@ -288,23 +289,17 @@ export default function Header() {
               </button> */}
             </div>
 
-            {/* Mobile: Search + Wishlist + Cart + Menu */}
-            <div className="flex lg:hidden items-center gap-2">
-              {/* Search Mobile */}
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  value={searchQueryMobile}
-                  onChange={(e) => {
-                    setSearchQueryMobile(e.target.value);
-                    setShowSuggestionsMobile(true);
-                  }}
-                  onFocus={() => setShowSuggestionsMobile(true)}
-                  placeholder="Tìm kiếm..."
-                  className="w-full pl-8 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs"
-                />
-                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-              </div>
+            {/* Mobile: Search icon + Wishlist + Cart + Menu */}
+            <div className="flex lg:hidden items-center gap-1">
+              {/* Search toggle icon */}
+              <button
+                type="button"
+                onClick={() => setShowMobileSearchBar((prev) => !prev)}
+                className="p-2 rounded-full hover:bg-gray-100 transition"
+                aria-label="Tìm kiếm sản phẩm"
+              >
+                <Search size={20} className="text-gray-700" />
+              </button>
 
               {/* Wishlist Mobile */}
               <Link
@@ -312,8 +307,8 @@ export default function Header() {
                 className="relative p-2 rounded-full hover:bg-red-50 transition-all"
                 aria-label="Sản phẩm yêu thích"
               >
-                <Heart 
-                  size={20} 
+                <Heart
+                  size={20}
                   className={`transition-colors ${
                     isActive('/yeu-thich')
                       ? 'text-red-500 fill-current'
@@ -328,9 +323,10 @@ export default function Header() {
               </Link>
 
               {/* Cart Mobile */}
-              <button 
+              <button
                 onClick={() => navigate('/gio-hang')}
                 className="relative p-2 rounded-full hover:bg-gray-100"
+                aria-label="Giỏ hàng"
               >
                 <ShoppingCart size={20} className="text-gray-700" />
                 {cartCount > 0 && (
@@ -344,6 +340,7 @@ export default function Header() {
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
+                aria-label="Mở menu"
               >
                 {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -351,6 +348,58 @@ export default function Header() {
           </div>
         </div>
       </header>
+
+      {/* Mobile search bar dropdown (hiển thị bên dưới header) */}
+      {showMobileSearchBar && (
+        <div className="lg:hidden fixed top-20 left-0 right-0 z-40 bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 py-2">
+            <form onSubmit={handleSearchMobile} className="relative">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQueryMobile}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSearchQueryMobile(value);
+                    setShowSuggestionsMobile(value.trim().length > 0);
+                  }}
+                  onFocus={() => {
+                    if (searchQueryMobile.trim()) {
+                      setShowSuggestionsMobile(true);
+                    }
+                  }}
+                  placeholder="Tìm kiếm sản phẩm..."
+                  className="w-full pl-9 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+                />
+                <button
+                  type="submit"
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  <Search size={16} />
+                </button>
+
+                {/* Gợi ý tìm kiếm Mobile dưới input */}
+                {showSuggestionsMobile && suggestionsMobile.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl border border-gray-100 max-h-80 overflow-y-auto shadow-lg z-50">
+                    <div className="p-2">
+                      {suggestionsMobile.map((product) => (
+                        <button
+                          key={product.id}
+                          type="button"
+                          onClick={() => handleSuggestionClickMobile(product.id)}
+                          className="w-full flex items-center gap-3 p-3 hover:bg-amber-50 rounded-lg transition text-left text-sm"
+                        >
+                          <span className="font-medium text-gray-800 line-clamp-1">{product.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Sidebar */}
       {sidebarOpen && (
@@ -361,7 +410,7 @@ export default function Header() {
           />
           <div className="fixed right-0 top-0 h-full w-80 bg-white z-50 transform transition-transform duration-300 overflow-y-auto">
             {/* Header Sidebar */}
-            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex items-center justify-between sticky top-0 bg-white z-10">
               <span className="font-bold text-lg">Menu</span>
               <button onClick={() => setSidebarOpen(false)} className="p-1 hover:bg-gray-100 rounded-lg">
                 <X size={24} />
@@ -407,14 +456,14 @@ export default function Header() {
               )}
             </div>
 
-            {/* Menu Items */}
-            <div className="p-4 space-y-3">
+            {/* Menu Items (Mobile sidebar: text & padding gọn hơn) */}
+            <div className="p-3 space-y-2">
               {mainMenu.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   onClick={() => setSidebarOpen(false)}
-                  className={`block py-3 px-4 rounded-lg transition font-medium ${
+                  className={`block py-2.5 px-3 rounded-lg transition font-medium text-sm ${
                     isActive(item.path)
                       ? "bg-amber-100 text-amber-700"
                       : "text-gray-700 hover:bg-gray-100"
@@ -428,7 +477,7 @@ export default function Header() {
               <Link
                 to="/yeu-thich"
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center justify-between py-3 px-4 rounded-lg transition font-medium ${
+                className={`flex items-center justify-between py-2.5 px-3 rounded-lg transition font-medium text-sm ${
                   isActive('/yeu-thich')
                     ? "bg-amber-100 text-amber-700"
                     : "text-gray-700 hover:bg-gray-100"
@@ -441,6 +490,27 @@ export default function Header() {
                 {wishlistCount > 0 && (
                   <span className="bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
                     {wishlistCount > 9 ? '9+' : wishlistCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Cart Link in Mobile */}
+              <Link
+                to="/gio-hang"
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center justify-between py-2.5 px-3 rounded-lg transition font-medium text-sm ${
+                  isActive('/gio-hang')
+                    ? "bg-amber-100 text-amber-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <ShoppingCart size={18} />
+                  Giỏ hàng
+                </span>
+                {cartCount > 0 && (
+                  <span className="bg-amber-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                    {cartCount > 9 ? '9+' : cartCount}
                   </span>
                 )}
               </Link>

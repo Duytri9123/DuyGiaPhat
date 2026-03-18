@@ -4,7 +4,7 @@ export default function QuoteProcessPage() {
   return (
     <div className="min-h-screen bg-gray-50 pt-20 md:pt-32">
       {/* Hero */}
-      <section className="relative h-[340px] md:h-[420px] flex items-center justify-center overflow-hidden bg-slate-950">
+      <section className="relative h-[320px] sm:h-[360px] md:h-[420px] flex items-center justify-center overflow-hidden bg-slate-950">
         <div
           className="absolute inset-0 opacity-40 bg-cover bg-center grayscale"
           style={{

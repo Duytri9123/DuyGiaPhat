@@ -160,55 +160,66 @@ export default function CartPage() {
             <div className="lg:col-span-2">
               <div className="bg-white rounded-lg border border-gray-200">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 p-6 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition">
-                    {/* Product Image */}
-                    {item.image && (
-                      <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  <div
+                    key={item.id}
+                    className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-6 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition"
+                  >
+                    {/* Left: Image + Info */}
+                    <div className="flex gap-4 w-full sm:w-auto">
+                      {/* Product Image */}
+                      {item.image && (
+                        <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+
+                      {/* Product Info */}
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-snug">{item.name}</h3>
+                        <p className="text-xs sm:text-sm text-gray-500">Mã: DGP-{String(item.id).padStart(3, '0')}</p>
+                        <p className="text-amber-600 font-bold mt-1 text-sm sm:text-base">
+                          {typeof item.price === 'number' ? `${item.price.toLocaleString()}đ` : item.price}
+                        </p>
                       </div>
-                    )}
-
-                    {/* Product Info */}
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                      <p className="text-sm text-gray-500">Mã: DGP-{String(item.id).padStart(3, '0')}</p>
-                      <p className="text-amber-600 font-bold mt-1">
-                        {typeof item.price === 'number' ? `${item.price.toLocaleString()}đ` : item.price}
-                      </p>
                     </div>
 
-                    {/* Quantity */}
-                    <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+                    {/* Right: Quantity + Subtotal + Delete */}
+                    <div className="flex items-center justify-between sm:justify-end w-full gap-4">
+                      {/* Quantity */}
+                      <div className="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-lg">
+                        <button
+                          onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                          className="p-1 hover:bg-gray-200 rounded transition"
+                        >
+                          <Minus size={16} />
+                        </button>
+                        <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
+                        <button
+                          onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                          className="p-1 hover:bg-gray-200 rounded transition"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+
+                      {/* Subtotal */}
+                      <div className="text-right min-w-[80px]">
+                        <p className="font-bold text-gray-900 text-sm sm:text-base">
+                          {typeof item.price === 'number'
+                            ? `${(item.price * item.quantity).toLocaleString()}đ`
+                            : 'Liên hệ'}
+                        </p>
+                      </div>
+
+                      {/* Delete */}
                       <button
-                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                        className="p-1 hover:bg-gray-200 rounded transition"
+                        onClick={() => handleRemove(item.id)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                        aria-label="Xóa sản phẩm"
                       >
-                        <Minus size={16} />
-                      </button>
-                      <span className="w-8 text-center font-semibold">{item.quantity}</span>
-                      <button
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                        className="p-1 hover:bg-gray-200 rounded transition"
-                      >
-                        <Plus size={16} />
+                        <Trash2 size={18} />
                       </button>
                     </div>
-
-                    {/* Subtotal */}
-                    <div className="text-right w-24">
-                      <p className="font-bold text-gray-900">
-                        {typeof item.price === 'number' ? `${(item.price * item.quantity).toLocaleString()}đ` : 'Liên hệ'}
-                      </p>
-                    </div>
-
-                    {/* Delete */}
-                    <button
-                      onClick={() => handleRemove(item.id)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
-                      aria-label="Xóa sản phẩm"
-                    >
-                      <Trash2 size={18} />
-                    </button>
                   </div>
                 ))}
               </div>
