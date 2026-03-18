@@ -1,170 +1,134 @@
 // src/components/layout/Footer.tsx
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Clock, Facebook, Youtube, ArrowUp } from "lucide-react";
-import { categories } from "../../data/categories";
-import logo from "../../assets/logo.jpg";
+import { Phone, Mail, MapPin, Facebook } from "lucide-react";
+import logo from "../../assets/logo.png";
+
+const ZaloIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12.49 10.272v-.45h1.347v6.322h-.77a.576.576 0 0 1-.577-.573v.001a3.27 3.27 0 0 1-1.938.632a3.284 3.284 0 0 1-3.284-3.282a3.284 3.284 0 0 1 3.284-3.282a3.27 3.27 0 0 1 1.937.632zM6.919 7.79v.205c0 .382-.051.694-.3 1.06l-.03.034a8 8 0 0 0-.242.285L2.024 14.8h4.895v.768a.576.576 0 0 1-.577.576H0v-.362c0-.443.11-.641.25-.847L4.858 9.23H.192V7.79zm8.551 8.354a.48.48 0 0 1-.48-.48V7.79h1.441v8.354zM20.693 9.6a3.306 3.306 0 1 1 .002 6.612a3.306 3.306 0 0 1-.002-6.612m-10.14 5.253a1.932 1.932 0 1 0 0-3.863a1.932 1.932 0 0 0 0 3.863m10.14-.003a1.945 1.945 0 1 0 0-3.89a1.945 1.945 0 0 0 0 3.89"/>
+  </svg>
+);
+
 export default function Footer() {
-    const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-
-    return (
-        <footer className="bg-gradient-to-b from-gray-900 to-black text-white">
-            <div className="max-w-7xl mx-auto px-4 py-10 lg:py-12">
-
-                {/* ==================== GRID: 1-2-4 CỘT ==================== */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10">
-
-                    {/* CỘT 1: LOGO + GIỚI THIỆU (chiếm 2 cột trên LG) */}
-                    <div className="lg:col-span-2 space-y-5">
-                        <Link to="/" className="flex items-center gap-3 group">
-                            <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl overflow-hidden shadow-lg group-hover:scale-105 transition-transform">
-                                <img
-                                    src={logo}
-                                    alt="Duy Gia Phát Logo"
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                            <div>
-                                <h3 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                                    Duy Gia Phát
-                                </h3>
-                                <p className="text-xs lg:text-sm text-gray-400">Thiết bị cơ điện chính hãng</p>
-                            </div>
-                        </Link>
-
-                        <p className="text-sm lg:text-base text-gray-300 leading-relaxed">
-                            Nhà phân phối <strong>thiết bị cơ điện hàng đầu Việt Nam</strong> với hơn <strong className="text-yellow-400">10 năm kinh nghiệm</strong>.
-                            Cam kết hàng chính hãng, giao nhanh, bảo hành dài hạn.
-                        </p>
-
-                        {/* Social */}
-                        <div className="flex gap-3">
-                            <a
-                                href="https://facebook.com/duygiaphat"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="bg-gray-800 p-2.5 rounded-full hover:bg-blue-600 transition-all hover:scale-110"
-                            >
-                                <Facebook size={18} />
-                            </a>
-                            <a
-                                href="https://youtube.com/@duygiaphat"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="bg-gray-800 p-2.5 rounded-full hover:bg-red-600 transition-all hover:scale-110"
-                            >
-                                <Youtube size={18} />
-                            </a>
-                        </div>
-                    </div>
-
-                    <div className="col-span-2 grid grid-cols-2 sm:grid-cols-2 gap-2">
-
-                        {/* CỘT 2: DANH MỤC */}
-                        <div className="space-y-4">
-                            <h4 className="font-bold text-lg text-blue-400">Danh mục sản phẩm</h4>
-                            <ul className="space-y-2 text-sm text-gray-300">
-                                {categories.slice(0, 7).map((cat) => (
-                                    <li key={cat.slug}>
-                                        <Link
-                                            to={`/danh-muc/${cat.slug}`}
-                                            className="flex items-center gap-2 hover:text-yellow-400 transition group"
-                                        >
-                                            <span className="text-yellow-500 opacity-0 group-hover:opacity-100 transition">›</span>
-                                            {cat.name}
-                                        </Link>
-                                    </li>
-                                ))}
-                                {categories.length > 7 && (
-                                    <li>
-                                        <Link
-                                            to="/san-pham"
-                                            className="text-yellow-400 font-medium text-sm hover:underline"
-                                        >
-                                            Xem tất cả →
-                                        </Link>
-                                    </li>
-                                )}
-                            </ul>
-                        </div>
-
-                        {/* CỘT 3: HỖ TRỢ */}
-                        <div className="space-y-4">
-                            <h4 className="font-bold text-lg text-blue-400">Hỗ trợ khách hàng</h4>
-                            <ul className="space-y-2 text-sm text-gray-300">
-                                {[
-                                    { label: "Chính sách bảo hành", to: "/chinh-sach/bao-hanh" },
-                                    { label: "Hướng dẫn mua hàng", to: "/huong-dan/mua-hang" },
-                                    { label: "Chính sách vận chuyển", to: "/chinh-sach/van-chuyen" },
-                                    { label: "Câu hỏi thường gặp", to: "/faq" },
-                                    { label: "Báo giá dự án", to: "/bao-gia" },
-                                ].map((item) => (
-                                    <li key={item.to}>
-                                        <Link
-                                            to={item.to}
-                                            className="hover:text-yellow-400 transition flex items-center gap-1"
-                                        >
-                                            <span className="text-xs">•</span> {item.label}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-
-                    {/* CỘT 4: LIÊN HỆ + HOTLINE */}
-                    <div className="space-y-5">
-                        <h4 className="font-bold text-lg text-blue-400">Liên hệ ngay</h4>
-                        <div className="space-y-4 text-sm">
-                            <a
-                                href="tel:0976707297"
-                                className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl hover:from-blue-700 hover:to-indigo-800 transition-all group"
-                            >
-                                <div className="bg-white/20 p-2 rounded-lg group-hover:scale-110 transition-transform">
-                                    <Phone size={18} />
-                                </div>
-                                <div>
-                                    <p className="text-gray-300 text-xs">Hotline 24/7</p>
-                                    <p className="font-bold text-lg">0976707297</p>
-                                </div>
-                            </a>
-
-                            <div className="space-y-3 text-gray-300">
-                                <p className="flex items-center gap-2">
-                                    <Mail size={16} className="text-yellow-400" />
-                                    <a href="mailto:contact@duygiaphat.vn" className="hover:text-yellow-400 transition">
-                                        contact@duygiaphat.vn
-                                    </a>
-                                </p>
-                                <p className="flex items-center gap-2">
-                                    <MapPin size={16} className="text-yellow-400" />
-                                    <span>TP.HCM • Hà Nội • Đà Nẵng</span>
-                                </p>
-                                <p className="flex items-center gap-2">
-                                    <Clock size={16} className="text-yellow-400" />
-                                    <span>T2 - T7: 8:00 - 17:30</span>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ==================== FOOTER BOTTOM ==================== */}
-                <div className="mt-10 pt-6 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500 gap-3">
-                    <p>© 2025 <span className="text-yellow-400 font-medium">Duy Gia Phát</span>. All rights reserved.</p>
-                    <div className="flex items-center gap-4">
-                        <Link to="/dieu-khoan" className="hover:text-yellow-400 transition">Điều khoản</Link>
-                        <span>•</span>
-                        <Link to="/chinh-sach" className="hover:text-yellow-400 transition">Chính sách</Link>
-                    </div>
-                    <button
-                        onClick={scrollToTop}
-                        className="flex items-center gap-1 hover:text-yellow-400 transition font-medium"
-                    >
-                        <ArrowUp size={14} />
-                        Về đầu trang
-                    </button>
-                </div>
+  return (
+    <footer className="bg-slate-950 text-slate-100">
+      {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {/* Column 1: Brand & Social */}
+          <div>
+            <div className="mb-6">
+              <img
+                src={logo}
+                alt="Duy Gia Phát Logo"
+                className="h-24 w-auto object-contain"
+              />
             </div>
-        </footer>
-    );
+            
+            <p className="text-sm text-slate-400 leading-relaxed mb-6">
+              Chuyên cung cấp vật tư, thiết bị điện công nghiệp và giải pháp tự động hóa hàng đầu Việt Nam. Chất lượng không thương hiệu.
+            </p>
+
+            {/* Social Links */}
+            <div className="flex items-center gap-3">
+              <a href="#" className="w-10 h-10 rounded-full bg-slate-800 hover:bg-amber-500 flex items-center justify-center transition">
+                <Facebook size={18} className="text-slate-300" />
+              </a>
+              <a href="https://zalo.me/0976707297" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-slate-800 hover:bg-amber-500 flex items-center justify-center transition text-slate-300">
+                <ZaloIcon />
+              </a>
+              <a href="mailto:info@duygiaphat.com.vn" className="w-10 h-10 rounded-full bg-slate-800 hover:bg-amber-500 flex items-center justify-center transition">
+                <Mail size={18} className="text-slate-300" />
+              </a>
+            </div>
+          </div>
+
+          {/* Column 2: Sản phẩm chính */}
+          <div>
+            <h3 className="text-white font-bold text-base mb-6 pb-2 border-b border-amber-500 border-opacity-30">
+              Sản phẩm chính
+            </h3>
+            <ul className="space-y-3 text-sm text-slate-400">
+              <li className="hover:text-amber-500 transition cursor-pointer flex items-center gap-2">
+                <span className="text-amber-500">•</span>
+                <span>Hệ thống Tủ điện MSB</span>
+              </li>
+              <li className="hover:text-amber-500 transition cursor-pointer flex items-center gap-2">
+                <span className="text-amber-500">•</span>
+                <span>Thang máng cáp điện</span>
+              </li>
+              <li className="hover:text-amber-500 transition cursor-pointer flex items-center gap-2">
+                <span className="text-amber-500">•</span>
+                <span>Tủ tu bộ công suất</span>
+              </li>
+              <li className="hover:text-amber-500 transition cursor-pointer flex items-center gap-2">
+                <span className="text-amber-500">•</span>
+                <span>Vỏ tủ điện Inox 304</span>
+              </li>
+              <li className="hover:text-amber-500 transition cursor-pointer flex items-center gap-2">
+                <span className="text-amber-500">•</span>
+                <span>Thiết bị đóng cắt</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Thông tin liên hệ */}
+          <div>
+            <h3 className="text-white font-bold text-base mb-6 pb-2 border-b border-amber-500 border-opacity-30">
+              Thông tin liên hệ
+            </h3>
+            <div className="space-y-4 text-sm text-slate-400">
+              <div className="flex gap-3">
+                <MapPin size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-white font-semibold">Khu Công Nghiệp Tân Bình, P. Tây Thạnh, Q. Tân Phú, TP. Hồ Chí Minh</p>
+                </div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <Phone size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-white font-semibold">Hotline: 090x xxx xxx</p>
+                </div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <Mail size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-slate-400">info@duygiaphat.com.vn</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 4: Vị trí (Map) */}
+          <div>
+            <h3 className="text-white font-bold text-base mb-6 pb-2 border-b border-amber-500 border-opacity-30">
+              Vị trí
+            </h3>
+            <div className="rounded-lg overflow-hidden h-40 bg-slate-800">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.3282957876586!2d106.63547!3d10.785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f17e9c5e0cf%3A0x0!2sDuy%20Gia%20Phat!5e0!3m2!1svi!2s!4v1234567890"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Footer */}
+      <div className="border-t border-slate-800 bg-slate-900/50 py-6">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+          <p>© 2024 CÔNG TY TNHH KỸ THUẬT DUY GIA PHÁT. TẤT CẢ QUYỀN LỢI ĐƯỢC BẢO LƯU.</p>
+          <div className="flex gap-6">
+            <a href="#" className="hover:text-amber-500 transition">CHÍNH SÁCH BẢO MẬT</a>
+            <a href="#" className="hover:text-amber-500 transition">ĐIỀU KHOẢN DỊCH VỤ</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }

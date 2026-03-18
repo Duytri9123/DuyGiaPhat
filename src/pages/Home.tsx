@@ -1,322 +1,629 @@
 // src/pages/Home.tsx
-import { useNavigate } from "react-router-dom";
-import { mockProducts } from "../data/mockData";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { mockProducts, mockPartners, mockNews, mockProjects } from "../data/mockData";
 import { categories } from "../data/categories";
-import ProductCard from "../components/common/ProductCard";
-import { Phone, Shield, Truck, Wrench, Award, ChevronRight, Zap, ArrowRight, CheckCircle } from "lucide-react";
+import { ChevronRight, CheckCircle, Heart, BadgeCheck, Truck, Headphones, Zap, Globe, Calendar, Clock, Tag, Phone } from "lucide-react";
 import AMB_headerbanner from "../assets/AMB_headerbanner.jpg";
-import banner from "../assets/banner.jpg";
+import { CategoryIcon } from "../components/common/CategoryIcons";
 
 export default function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [heroBackground, setHeroBackground] = useState<string>(AMB_headerbanner);
+  
+  // Animated text rotation
+  const heroTexts = [
+    "Hệ Thống Tủ Điều Khiển PLC Cao Cấp",
+    "Giải Pháp Tự Động Hóa Toàn Diện",
+    "Thiết Bị Điện Công Nghiệp Hàng Đầu",
+    "Chuẩn ISO - Hiệu Suất Tối Ưu"
+  ];
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [fadeIn, setFadeIn] = useState(true);
 
-  // Sản phẩm bán chạy
-  const featuredProducts = [...mockProducts]
+  // Sản phẩm bán chạy - 4 sản phẩm
+  const bestSellers = [...mockProducts]
     .sort((a, b) => b.sales - a.sales)
-    .slice(0, 8);
+    .slice(0, 4);
 
-  // Danh mục nổi bật - hiển thị tất cả 5 danh mục
-  const featuredCategories = categories.filter(cat => cat.featured);
+  // State cho wishlist
+  const [wishlisted, setWishlisted] = useState<{[key: number]: boolean}>({});
 
-  const stats = [
-    { icon: <Zap className="w-6 h-6" />, value: "10+", label: "Năm kinh nghiệm" },
-    { icon: <Truck className="w-6 h-6" />, value: "5000+", label: "Khách hàng" },
-    { icon: <Shield className="w-6 h-6" />, value: "100%", label: "Hàng chính hãng" },
-    { icon: <Award className="w-6 h-6" />, value: "4.9★", label: "Đánh giá" },
-  ];
+  // Load wishlist từ localStorage
+  useEffect(() => {
+    const loadWishlist = () => {
+      const savedWishlist = localStorage.getItem('wishlist');
+      if (savedWishlist) {
+        try {
+          const wishlist = JSON.parse(savedWishlist);
+          const wishlistMap: {[key: number]: boolean} = {};
+          wishlist.forEach((item: any) => {
+            wishlistMap[item.id] = true;
+          });
+          setWishlisted(wishlistMap);
+        } catch (error) {
+          console.error('Error loading wishlist:', error);
+        }
+      }
+    };
 
-  const services = [
-    { icon: <Shield className="w-12 h-12" />, title: "Hàng chính hãng", desc: "CO/CQ đầy đủ, nguồn gốc rõ ràng" },
-    { icon: <Truck className="w-12 h-12" />, title: "Giao hàng nhanh", desc: "Miễn phí nội thành HCM & HN" },
-    { icon: <Wrench className="w-12 h-12" />, title: "Lắp đặt chuyên nghiệp", desc: "Kỹ thuật viên giàu kinh nghiệm" },
-    { icon: <Award className="w-12 h-12" />, title: "Bảo hành dài hạn", desc: "12-36 tháng, hỗ trợ 24/7" },
-  ];
+    loadWishlist();
 
-  const highlights = [
-    "Giá cạnh tranh, chiết khấu cao cho dự án lớn",
-    "Hơn 10,000+ thiết bị luôn có sẵn trong kho",
-    "Tư vấn kỹ thuật 24/7 bởi đội ngũ chuyên gia"
-  ];
+    const handleWishlistUpdate = () => {
+      loadWishlist();
+    };
+
+    window.addEventListener('wishlistUpdated', handleWishlistUpdate);
+    return () => {
+      window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
+    };
+  }, []);
+
+  // Toggle wishlist
+  const handleToggleWishlist = (product: typeof mockProducts[0], e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const savedWishlist = localStorage.getItem('wishlist');
+    let wishlist: typeof mockProducts = [];
+
+    if (savedWishlist) {
+      try {
+        wishlist = JSON.parse(savedWishlist);
+      } catch (error) {
+        wishlist = [];
+      }
+    }
+
+    const isInWishlist = wishlist.some((item) => item.id === product.id);
+
+    if (isInWishlist) {
+      wishlist = wishlist.filter((item) => item.id !== product.id);
+      setWishlisted(prev => ({
+        ...prev,
+        [product.id]: false
+      }));
+    } else {
+      wishlist.push(product);
+      setWishlisted(prev => ({
+        ...prev,
+        [product.id]: true
+      }));
+    }
+
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    window.dispatchEvent(new Event('wishlistUpdated'));
+  };
+
+  // Listening for category change from Header
+  useEffect(() => {
+    const handleCategorySelect = (e: CustomEvent) => {
+      const categorySlug = e.detail;
+      const category = categories.find(c => c.slug === categorySlug);
+      if (category) {
+        setSelectedCategory(categorySlug);
+        setHeroBackground(category.iconUrl);
+      }
+    };
+
+    window.addEventListener('categorySelected', handleCategorySelect as EventListener);
+    return () => {
+      window.removeEventListener('categorySelected', handleCategorySelect as EventListener);
+    };
+  }, []);
+
+  // Animated text rotation effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFadeIn(false);
+      setTimeout(() => {
+        setCurrentTextIndex((prev) => (prev + 1) % heroTexts.length);
+        setFadeIn(true);
+      }, 300);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Handle Add to Cart
+  const handleAddToCart = (product: typeof mockProducts[0], e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const savedCart = localStorage.getItem('cart');
+    let cart: typeof mockProducts = [];
+
+    if (savedCart) {
+      try {
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed)) {
+          cart = parsed;
+        }
+      } catch (error) {
+        cart = [];
+      }
+    }
+
+    // Check if product already in cart
+    const existingItem = cart.find((item) => item.id === product.id);
+    
+    if (!existingItem) {
+      cart.push(product);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      window.dispatchEvent(new Event('cartUpdated'));
+      
+      // Show toast notification
+      alert(`✅ Đã thêm "${product.name}" vào giỏ hàng!`);
+    } else {
+      alert(`ℹ️ Sản phẩm này đã có trong giỏ hàng!`);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Hero Section - Professional Banner */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-          }}></div>
+    <div className="min-h-screen bg-white pt-20 md:pt-32">
+      {/* Hero Slider Banner */}
+      <section className="relative w-full bg-slate-900 overflow-hidden h-[500px]">
+        <div 
+          className="absolute inset-0 opacity-60 bg-cover bg-center transition-all duration-500"
+          style={{
+            backgroundImage: `url('${heroBackground}')`
+          }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/40 to-transparent"></div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 h-full flex flex-col justify-center items-start text-white">
+          {/* Badge with animation */}
+          <span className="animate-pulse bg-amber-500 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+            ✨ Sản phẩm tiêu biểu
+          </span>
+          
+          {/* Animated Title */}
+          <h2 
+            className={`text-4xl md:text-6xl font-bold mb-6 max-w-2xl leading-tight transition-all duration-500 transform ${
+              fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+          >
+            {heroTexts[currentTextIndex]}
+          </h2>
+          
+          {/* Animated Subtitle */}
+          <p className={`text-lg text-slate-200 mb-8 max-w-xl transition-all duration-700 transform ${
+            fadeIn ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
+          }`}>
+            Giải pháp tự động hóa toàn diện cho nhà máy, thiết kế chuẩn ISO, bền bỉ và hiệu suất tối ưu.
+          </p>
+          
+          {/* CTA Buttons with stagger animation */}
+          <div className={`flex gap-4 transition-all duration-700 transform ${
+            fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`} style={{ transitionDelay: '0.1s' }}>
+            <button 
+              onClick={() => navigate("/san-pham")}
+              className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-lg font-bold transition-all transform hover:scale-105 hover:shadow-xl"
+            >
+              Khám phá ngay
+            </button>
+            <button
+              onClick={() => navigate("/lien-he")}
+              className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 px-8 py-3 rounded-lg font-bold transition-all transform hover:scale-105 hover:shadow-lg"
+            >
+              Gửi yêu cầu tư vấn
+            </button>
+          </div>
+          
+          {/* Animated scroll indicator */}
+          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs text-slate-300 font-medium">Cuộn để xem thêm</span>
+              <svg className="w-5 h-5 text-amber-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* Image Background with Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-blue-900/90 to-slate-900/95">
-          <img
-            src={AMB_headerbanner}
-            alt="Industrial Equipment"
-            className="w-full h-full object-cover opacity-20"
-          />
+      {/* Featured Highlights */}
+      <section className="max-w-7xl mx-auto px-4 py-12 -mt-16 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Quality */}
+          <div className="bg-white p-6 rounded-xl flex items-center gap-5 border border-amber-200/50">
+            <div className="bg-amber-500/10 p-4 rounded-full text-amber-600 flex items-center justify-center flex-shrink-0">
+              <BadgeCheck className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Chất lượng quốc tế</h3>
+              <p className="text-sm text-slate-600">Sản phẩm đạt chuẩn IEC/ISO</p>
+            </div>
+          </div>
+
+          {/* Shipping */}
+          <div className="bg-white p-6 rounded-xl flex items-center gap-5 border border-amber-200/50">
+            <div className="bg-amber-500/10 p-4 rounded-full text-amber-600 flex items-center justify-center flex-shrink-0">
+              <Truck className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Giao hàng nhanh</h3>
+              <p className="text-sm text-slate-600">Vận chuyển toàn quốc 24/7</p>
+            </div>
+          </div>
+
+          {/* Support */}
+          <button
+            type="button"
+            onClick={() => navigate("/quy-trinh-bao-gia")}
+            className="bg-white p-6 rounded-xl flex items-center gap-5 border border-amber-200/50 text-left hover:border-amber-400 hover:shadow-md transition-all"
+          >
+            <div className="bg-amber-500/10 p-4 rounded-full text-amber-600 flex items-center justify-center flex-shrink-0">
+              <Headphones className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Hỗ trợ kỹ thuật</h3>
+              <p className="text-sm text-slate-600">Tư vấn giải pháp miễn phí</p>
+            </div>
+          </button>
         </div>
+      </section>
 
-        <div className="relative max-w-7xl mx-auto px-4 py-16 md:py-24">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <div className="space-y-6">
-              <div className="inline-block">
-                <span className="bg-yellow-400/20 text-yellow-400 px-4 py-2 rounded-full text-sm font-semibold border border-yellow-400/30">
-                  ⚡ Nhà phân phối thiết bị cơ điện hàng đầu
-                </span>
+      {/* Featured Categories Section */}
+      <section className="bg-gray-50 py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900">Danh Mục Nổi Bật</h2>
+            <div className="h-1.5 w-24 bg-amber-500 mx-auto mt-2 rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            {categories.slice(0, 5).map((category) => (
+              <div
+                key={category.id}
+                onClick={() => navigate(`/danh-muc/${category.slug}`)}
+                className="group bg-white rounded-lg p-8 text-center border border-gray-200 hover:border-amber-300 hover:shadow-lg transition-all cursor-pointer hover:translateY-2"
+              >
+                <div className="w-16 h-16 mx-auto mb-4 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all flex items-center justify-center">
+                  <CategoryIcon categorySlug={category.slug} size={56} />
+                </div>
+                <h3 className="font-bold text-slate-900 group-hover:text-amber-600 transition-colors text-sm">
+                  {category.name}
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">{category.count} sản phẩm</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Giải pháp{" "}
-                <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 bg-clip-text text-transparent">
-                  Cơ Điện
+      {/* Best Sellers Grid */}
+      <section className="max-w-7xl mx-auto px-4 py-20">
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <h2 className="text-3xl font-bold text-slate-900">Sản Phẩm Bán Chạy</h2>
+            <div className="h-1.5 w-24 bg-amber-500 mt-2 rounded-full"></div>
+          </div>
+          <a 
+            onClick={() => navigate("/san-pham")}
+            className="text-amber-600 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
+          >
+            Xem tất cả <ChevronRight size={20} />
+          </a>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {bestSellers.map((product) => (
+            <div 
+              key={product.id}
+              className="group bg-white rounded-xl overflow-hidden border border-slate-200 transition-all duration-300 cursor-pointer flex flex-col h-full"
+              onClick={() => navigate(`/san-pham/${product.id}`)}
+            >
+              <div className="relative aspect-square overflow-hidden bg-slate-100 flex-shrink-0">
+                <img 
+                  src={product.image} 
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                {product.badge && (
+                  <span className="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded">
+                    {product.badge}
+                  </span>
+                )}
+              </div>
+              <div className="p-4 flex flex-col flex-grow">
+                <span className="text-slate-400 text-xs font-medium uppercase tracking-tighter">
+                  Mã: DGP-{String(product.id).padStart(3, '0')}
                 </span>
-                <br />Toàn Diện
-              </h1>
+                <h3 className="font-bold text-slate-800 mt-1 mb-2 line-clamp-2 group-hover:text-amber-600 transition-colors">
+                  {product.name}
+                </h3>
+                
+                <div className="flex-grow"></div>
 
-              <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
-                Cung cấp động cơ, biến tần, tủ điện, máy bơm, cáp điện chính hãng
-                cho nhà máy, khu công nghiệp và dự án lớn trên toàn quốc.
-              </p>
+                {/* Giá */}
+                <div className="mb-3">
+                  <span className="text-amber-600 font-bold text-lg">Giá: Liên hệ</span>
+                </div>
+                
+                {/* 2 nút: Yêu thích + Giỏ hàng */}
+                <div className="flex gap-2">
+                  {/* Nút yêu thích */}
+                  <button
+                    onClick={(e) => handleToggleWishlist(product, e)}
+                    className={`flex-1 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all text-sm border-2 ${
+                      wishlisted[product.id]
+                        ? 'bg-red-500 text-white border-red-500 hover:bg-red-600'
+                        : 'bg-white text-red-500 border-red-500 hover:bg-red-50'
+                    }`}
+                    aria-label="Thêm vào yêu thích"
+                  >
+                    <Heart size={16} className={wishlisted[product.id] ? 'fill-current' : ''} />
+                    <span className="hidden sm:inline">Yêu thích</span>
+                  </button>
 
-              {/* Highlights */}
-              <div className="space-y-3 pt-2">
-                {highlights.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-200 text-sm md:text-base">{item}</span>
+                  {/* Nút giỏ hàng */}
+                  <button 
+                    className="flex-1 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium flex items-center justify-center gap-2 transition-all text-sm hover:shadow-lg transform hover:scale-105"
+                    onClick={(e) => handleAddToCart(product, e)}
+                    aria-label="Thêm vào giỏ hàng"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                    <span className="hidden sm:inline">Giỏ hàng</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Solutions Section */}
+      <section className="bg-amber-50/50 py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="relative">
+            <div className="absolute -top-10 -left-10 w-40 h-40 bg-amber-200/30 rounded-full blur-3xl"></div>
+            <img 
+              src={AMB_headerbanner}
+              alt="Electrical engineer working"
+              className="rounded-2xl relative z-10 w-full h-[400px] object-cover"
+            />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold mb-6 text-slate-900">
+              Giải Pháp Cơ Điện Toàn Diện
+            </h2>
+            <p className="text-slate-600 mb-8 leading-relaxed">
+              Duy Gia Phát tự hào là đơn vị hàng đầu cung cấp giải pháp thiết kế và lắp đặt hệ thống điện công nghiệp. Chúng tôi cam kết mang lại sản phẩm an toàn, tiết kiệm và hiện đại nhất cho dự án của bạn.
+            </p>
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-amber-600 flex-shrink-0" />
+                <span>Tư vấn kỹ thuật chuyên sâu từ chuyên gia</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-amber-600 flex-shrink-0" />
+                <span>Thi công nhanh chóng, đúng tiến độ cam kết</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-amber-600 flex-shrink-0" />
+                <span>Bảo hành dài hạn lên tới 24 tháng</span>
+              </li>
+            </ul>
+            <button
+              onClick={() => navigate("/lien-he")}
+              className="bg-slate-900 text-white px-10 py-4 rounded-lg font-bold hover:opacity-90 transition-all inline-flex items-center gap-2"
+            >
+              <Phone size={18} />
+              Liên hệ tư vấn ngay
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Partner Brands Section */}
+      <section className="bg-slate-900/5 py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Các Thương Hiệu Hợp Tác</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              Duy Gia Phát hợp tác với các nhà cung cấp hàng đầu thế giới để mang lại sản phẩm chất lượng cao nhất.
+            </p>
+            <div className="h-1.5 w-24 bg-amber-500 mx-auto mt-4 rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {mockPartners.slice(0, 6).map((partner) => (
+              <div
+                key={partner.id}
+                className="bg-white rounded-lg p-6 flex items-center justify-center h-32 border border-slate-200 hover:border-amber-300 hover:shadow-md transition-all group cursor-pointer"
+              >
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-slate-900 group-hover:text-amber-600 group-hover:scale-110 transition-all">
+                    {partner.logo}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <a
+              href="/doi-tac"
+              className="text-amber-600 hover:text-amber-700 font-bold flex items-center gap-2 justify-center"
+            >
+              Xem tất cả đối tác <ChevronRight size={20} />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Projects Section */}
+      <section className="max-w-7xl mx-auto px-4 py-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-slate-900">Dự Án Tiêu Biểu</h2>
+          <p className="text-slate-600 max-w-2xl mx-auto mt-3">
+            Sự tin tưởng của các tập đoàn lớn là niềm chúc của Duy Gia Phát.
+          </p>
+          <div className="h-1.5 w-24 bg-amber-500 mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {mockProjects.slice(0, 3).map((project) => (
+            <div
+              key={project.id}
+              onClick={() => navigate(`/du-an/${project.id}`)}
+              className="group relative overflow-hidden rounded-xl cursor-pointer h-64 bg-slate-900"
+            >
+              {/* Background Image */}
+              <div className="absolute inset-0 w-full h-full">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-900 z-10"></div>
+                <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
+                  <div className="text-6xl opacity-30 group-hover:scale-110 transition-transform duration-500">
+                    🏭
                   </div>
-                ))}
+                </div>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <a
-                  href="tel:0976707297"
-                  className="group bg-gradient-to-r from-yellow-400 to-orange-500 text-slate-900 px-6 md:px-8 py-3.5 md:py-4 rounded-lg font-bold hover:from-yellow-300 hover:to-orange-400 transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 transform hover:scale-105"
-                >
-                  <Phone size={20} className="group-hover:animate-pulse" />
-                  <span className="text-base md:text-lg">Gọi báo giá: 0976707297</span>
-                </a>
-                <button
-                  onClick={() => navigate("/san-pham")}
-                  className="group border-2 border-white/30 bg-white/10 backdrop-blur-sm text-white px-6 md:px-8 py-3.5 md:py-4 rounded-lg font-bold hover:bg-white hover:text-blue-900 transition-all flex items-center justify-center gap-2"
-                >
-                  <span className="text-base md:text-lg">Xem sản phẩm</span>
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              {/* Content Overlay */}
+              <div className="absolute inset-0 flex flex-col justify-end p-6 z-20">
+                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
+                  {project.title}
+                </h3>
+                <p className="text-amber-400 font-semibold text-sm">
+                  {project.category}
+                </p>
+              </div>
+
+              {/* Hover Overlay */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 z-15 flex items-center justify-center">
+                <button className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-lg font-bold transition-all">
+                  Xem chi tiết
                 </button>
               </div>
             </div>
+          ))}
+        </div>
 
-            {/* Right Image */}
-            <div className="hidden md:flex justify-center items-center">
-              <div className="relative">
-                {/* Main Image Card */}
-                <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                  <img
-                    src={banner}
-                    alt="Electric Motor"
-                    className="rounded-xl shadow-2xl w-full h-auto"
-                  />
+        <div className="text-center mt-10">
+          <a
+            href="/du-an"
+            className="text-amber-600 hover:text-amber-700 font-bold flex items-center gap-2 justify-center"
+          >
+            Xem tất cả dự án <ChevronRight size={20} />
+          </a>
+        </div>
+      </section>
 
-                  {/* Floating Badge */}
-                  <div className="absolute -top-4 -right-4 bg-gradient-to-r from-green-400 to-emerald-500 text-white px-6 py-3 rounded-full font-bold shadow-xl rotate-12 animate-pulse">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold">100%</div>
-                      <div className="text-xs">Chính hãng</div>
-                    </div>
-                  </div>
+      {/* News Section */}
+      <section className="max-w-7xl mx-auto px-4 py-20">
+        <div className="flex items-center justify-between mb-12">
+          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Tin tức & Bài viết</h2>
+          <a
+            href="/tin-tuc"
+            className="text-amber-600 font-semibold flex items-center gap-2 hover:gap-3 transition-all"
+          >
+            Xem tất cả <ChevronRight size={20} />
+          </a>
+        </div>
 
-                  {/* Stats Card */}
-                  <div className="absolute -bottom-6 -left-6 bg-gradient-to-br from-blue-600 to-indigo-700 text-white px-6 py-4 rounded-xl shadow-2xl">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold">5000+</div>
-                      <div className="text-sm text-blue-100">Khách hàng tin tưởng</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Decorative Elements */}
-                <div className="absolute -z-10 top-10 -right-10 w-72 h-72 bg-yellow-400/20 rounded-full blur-3xl"></div>
-                <div className="absolute -z-10 -bottom-10 -left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {mockNews.slice(0, 3).map((article) => (
+            <a
+              key={article.id}
+              href={`/tin-tuc/${article.id}`}
+              className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg hover:border-amber-200 transition-all"
+            >
+              {/* Article Image */}
+              <div className="aspect-video overflow-hidden bg-gray-100">
+                <img
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                />
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Bottom Wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-12 md:h-16">
-            <path d="M0,0 C300,100 900,100 1200,0 L1200,120 L0,120 Z" fill="rgb(249, 250, 251)"></path>
-          </svg>
-        </div>
-      </section>
-
-      {/* Danh mục nổi bật */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-3">Danh mục sản phẩm</h2>
-            <p className="text-gray-600">Hơn 1000+ thiết bị chất lượng cao</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {featuredCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => navigate(`/danh-muc/${cat.slug}`)}
-                className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all hover:-translate-y-2 p-2 text-center border border-gray-100"
-              >
-                <div className="mb-4 overflow-hidden rounded-xl">
-                  <img
-                    src={cat.iconUrl}
-                    alt={cat.name}
-                    className="w-full h-32 object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition text-sm mb-1">
-                  {cat.name}
-                </h3>
-                <p className="text-xs text-gray-500">{cat.count} sản phẩm</p>
-              </button>
-            ))}
-          </div>
-          <div className="text-center mt-10">
-            <button
-              onClick={() => navigate("/san-pham")}
-              className="text-blue-600 font-medium hover:underline flex items-center mx-auto gap-1"
-            >
-              Xem tất cả danh mục <ChevronRight size={18} />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Sản phẩm bán chạy */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-3">Sản phẩm bán chạy</h2>
-            <p className="text-gray-600">Được hàng nghìn khách hàng tin dùng</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-1 lg:gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onClick={() => navigate(`/san-pham/${product.id}`)}
-              />
-            ))}
-          </div>
-          <div className="text-center mt-10">
-            <button
-              onClick={() => navigate("/san-pham")}
-              className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition shadow-md"
-            >
-              Xem tất cả sản phẩm
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Cam kết dịch vụ */}
-      <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="inline-block mb-4">
-              <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold">
-                ⭐ Cam kết chất lượng
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
-              Tại sao chọn Duy Gia Phát?
-            </h2>
-            <p className="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
-              Đồng hành cùng dự án của bạn với đội ngũ chuyên nghiệp và dịch vụ tận tâm
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            {services.map((item, i) => (
-              <div
-                key={i}
-                className="group bg-white rounded-2xl p-4 md:p-6 shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-blue-200 hover:-translate-y-2"
-              >
-                <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4 text-blue-600 group-hover:bg-gradient-to-br group-hover:from-blue-600 group-hover:to-indigo-700 group-hover:text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
-                  <div className="scale-75 md:scale-90 lg:scale-100">
-                    {item.icon}
+              {/* Article Content */}
+              <div className="p-5">
+                {/* Category & Date */}
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <Tag size={14} className="text-amber-500" />
+                    <span className="text-xs font-bold text-amber-600 uppercase">{article.category}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <Clock size={14} />
+                    {article.date}
                   </div>
                 </div>
-                <h3 className="font-bold text-sm md:text-base lg:text-lg text-gray-800 mb-1 md:mb-2 group-hover:text-blue-600 transition-colors">
-                  {item.title}
+
+                {/* Title */}
+                <h3 className="font-bold text-sm mb-3 line-clamp-2 group-hover:text-amber-600 transition">
+                  {article.title}
                 </h3>
-                <p className="text-gray-600 text-xs md:text-sm leading-relaxed">
-                  {item.desc}
+
+                {/* Excerpt */}
+                <p className="text-xs text-gray-600 line-clamp-2 mb-4">
+                  {article.excerpt}
                 </p>
-              </div>
-            ))}
-          </div>
 
-          {/* Trust badges */}
-          <div className="mt-12 flex flex-wrap justify-center items-center gap-4 md:gap-8 text-xs md:text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Hơn 10 năm kinh nghiệm</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>Phục vụ 5000+ khách hàng</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-              <span>Đánh giá 4.9⭐</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Thống kê */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {stats.map((stat, i) => (
-              <div key={i} className="group">
-                <div className="text-5xl font-bold mb-2 flex items-center justify-center gap-2">
-                  {stat.icon}
-                  <span className="group-hover:scale-110 transition-transform inline-block">{stat.value}</span>
+                {/* Read More Link */}
+                <div className="text-amber-600 font-semibold text-xs flex items-center gap-1 group-hover:gap-2 transition-all">
+                  Đọc thêm <ChevronRight size={14} />
                 </div>
-                <p className="text-blue-100">{stat.label}</p>
               </div>
-            ))}
-          </div>
+            </a>
+          ))}
         </div>
       </section>
 
-      {/* CTA cuối trang */}
-      <section className="py-20 bg-gray-100">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-gray-800 mb-6">
-            Sẵn sàng nâng cấp hệ thống cơ điện?
+      {/* CTA Section */}
+      <section className="bg-gradient-to-r from-slate-900 to-slate-800 py-24 overflow-hidden relative">
+        {/* Animated Background decoration */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl -z-0 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl -z-0 animate-pulse" style={{ animationDelay: '1s' }}></div>
+
+        {/* Animated background grid */}
+        <div className="absolute inset-0 opacity-5 -z-0">
+          <div className="absolute inset-0 bg-cover" style={{
+            backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(255,200,87,0.05) 25%, rgba(255,200,87,0.05) 26%, transparent 27%, transparent 74%, rgba(255,200,87,0.05) 75%, rgba(255,200,87,0.05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255,200,87,0.05) 25%, rgba(255,200,87,0.05) 26%, transparent 27%, transparent 74%, rgba(255,200,87,0.05) 75%, rgba(255,200,87,0.05) 76%, transparent 77%, transparent)`,
+            backgroundSize: '50px 50px'
+          }}></div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
+          {/* Animated Title */}
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 animate-slideInDown">
+            Bạn Cần Tư Vấn Giải Pháp Điện Công Nghiệp?
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Liên hệ ngay để được <strong>báo giá tốt nhất</strong> trong <span className="text-blue-600 font-bold">5 phút</span>!
+          
+          {/* Animated Description */}
+          <p className="text-xl text-slate-200 mb-10 max-w-3xl mx-auto animate-fadeInScale" style={{ animationDelay: '0.2s' }}>
+            Duy Gia Phát sẵn sàng hỗ trợ bạn với các giải pháp điện hàng đầu, tư vấn miễn phí từ các chuyên gia có chứng chỉ quốc tế.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+          {/* Animated Buttons Container */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInScale" style={{ animationDelay: '0.4s' }}>
+            {/* Phone Button */}
             <a
               href="tel:0976707297"
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 text-blue-900 px-10 py-5 rounded-full font-bold hover:from-yellow-300 hover:to-orange-400 transition shadow-xl text-lg flex items-center justify-center gap-3 transform hover:scale-105"
+              className="bg-amber-500 hover:bg-amber-600 text-white px-10 py-4 rounded-lg font-bold transition-all transform hover:scale-110 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl hover:shadow-amber-500/50 relative group overflow-hidden"
             >
-              <Phone size={24} />
-              Gọi ngay: 0976707297
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform translate-x-full group-hover:translate-x-0 transition-all duration-700"></span>
+              <span className="text-2xl group-hover:animate-bounce">📞</span> 
+              <span className="relative">Gọi: 0976707297</span>
             </a>
-            <button
-              onClick={() => navigate("/gioi-thieu")}
-              className="border-2 border-blue-600 text-blue-600 px-10 py-5 rounded-full font-bold hover:bg-blue-50 transition text-lg"
-            >
-              Tư vấn miễn phí
+
+            {/* Chat Zalo Button */}
+            <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border-2 border-white px-10 py-4 rounded-lg font-bold transition-all transform hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-white/10 relative group overflow-hidden">
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-10 transform -translate-x-full group-hover:translate-x-full transition-all duration-700"></span>
+              <span className="flex items-center justify-center gap-2 relative">
+                <span className="text-2xl group-hover:rotate-12 transition-transform">💬</span> 
+                <span>Chat Zalo</span>
+              </span>
             </button>
           </div>
+
+          {/* Animated Footer Text */}
+          <p className="text-slate-400 mt-8 text-sm animate-fadeInScale" style={{ animationDelay: '0.6s' }}>
+            Thời gian phản hồi: &lt; 15 phút | Hỗ trợ: 8:00 - 17:00 (Thứ 2 - Thứ 6)
+          </p>
         </div>
       </section>
     </div>

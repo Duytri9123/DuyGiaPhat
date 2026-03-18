@@ -22,7 +22,7 @@ export default function CategoryPage() {
   const currentCategory = categories.find((c) => c.slug === categorySlug);
   if (!currentCategory && categorySlug) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gray-50 pt-20 md:pt-40 flex items-center justify-center px-4">
         <div className="text-center">
           <p className="text-lg sm:text-xl text-gray-600 mb-4">Danh mục không tồn tại</p>
           <button
@@ -82,7 +82,7 @@ export default function CategoryPage() {
     : currentCategory?.name || "Danh mục";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-20 md:pt-40">
       {/* Hero */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">

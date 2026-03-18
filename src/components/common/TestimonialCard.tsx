@@ -8,7 +8,7 @@ interface TestimonialCardProps {
 
 export default function TestimonialCard({ testimonial }: TestimonialCardProps) {
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 transition-all">
       <div className="flex items-center mb-4">
         {[...Array(5)].map((_, i) => (
           <Star key={i} size={20} className={i < testimonial.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'} />

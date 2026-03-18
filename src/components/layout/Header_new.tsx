@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Search, ShoppingCart, User, Heart, CheckCircle, Truck, Headphones } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User } from "lucide-react";
 import { mockProducts } from "../../data/mockData";
 import logo from "../../assets/logo.png";
 
@@ -11,57 +11,13 @@ export default function Header() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showSuggestionsMobile, setShowSuggestionsMobile] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(0);
   
   const navigate = useNavigate();
   const location = useLocation();
   const searchRef = useRef<HTMLDivElement>(null);
   const searchRefMobile = useRef<HTMLDivElement>(null);
 
-  // Load wishlist count từ localStorage
-  useEffect(() => {
-    const loadCounts = () => {
-      // Load wishlist
-      const savedWishlist = localStorage.getItem('wishlist');
-      if (savedWishlist) {
-        try {
-          const wishlist = JSON.parse(savedWishlist);
-          setWishlistCount(wishlist.length);
-        } catch (error) {
-          setWishlistCount(0);
-        }
-      }
-      // Load cart
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        try {
-          const cart = JSON.parse(savedCart);
-          setCartCount(cart.length);
-        } catch (error) {
-          setCartCount(0);
-        }
-      }
-    };
-
-    loadCounts();
-
-    const handleStorageChange = () => {
-      loadCounts();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('wishlistUpdated', handleStorageChange);
-    window.addEventListener('cartUpdated', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('wishlistUpdated', handleStorageChange);
-      window.removeEventListener('cartUpdated', handleStorageChange);
-    };
-  }, []);
-
   const mainMenu = [
-    { label: "Giới thiệu", path: "/gioi-thieu" },
     { label: "Sản phẩm", path: "/san-pham" },
     { label: "Dịch vụ", path: "/dich-vu" },
     { label: "Dự án", path: "/du-an" },
@@ -136,41 +92,12 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Utility Bar - FIXED */}
-      <div className="bg-gray-900 text-white py-2 text-xs md:text-sm font-medium border-b border-gray-800 hidden md:block fixed top-0 left-0 right-0 z-40 h-10">
-        <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-between items-center gap-4 h-full">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <CheckCircle size={18} className="text-amber-500" />
-              <span>Chất lượng quốc tế</span>
-            </div>
-            <div className="flex items-center gap-2 border-l border-gray-700 pl-6">
-              <Truck size={18} className="text-amber-500" />
-              <span>Giao hàng nhanh</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => navigate("/quy-trinh-bao-gia")}
-              className="flex items-center gap-2 border-l border-gray-700 pl-6 hover:text-amber-400 transition-colors"
-            >
-              <Headphones size={18} className="text-amber-500" />
-              <span>Hỗ trợ kỹ thuật</span>
-            </button>
-          </div>
-          <div className="hidden lg:flex items-center gap-4 text-xs">
-            <span>Hotline: 0976707297</span>
-            <span className="text-gray-600">|</span>
-            <span>Email: info@duygiaphat.com.vn</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Header - positioned below utility bar */}
-      <header className="bg-white fixed top-0 md:top-10 left-0 right-0 z-50 border-b border-gray-100 h-20">
-        <div className="max-w-7xl mx-auto px-4 h-full">
-          <div className="flex items-center justify-between h-full gap-4">
+      {/* Header chính */}
+      <header className="bg-white fixed top-0 left-0 right-0 z-50 border-b border-gray-100">
+        <div className="max-w-full mx-auto px-4">
+          <div className="flex items-center justify-between h-20 gap-4">
             {/* Logo */}
-            <Link to="/" className="shrink-0">
+            <Link to="/" className="flex-shrink-0">
               <img
                 src={logo}
                 alt="Duy Gia Phát Logo"
@@ -178,7 +105,7 @@ export default function Header() {
               />
             </Link>
 
-            {/* Desktop Menu */}
+            {/* Desktop Menu và Search */}
             <div className="hidden lg:flex items-center flex-1 justify-center gap-8">
               {mainMenu.map((item) => (
                 <Link
@@ -195,7 +122,7 @@ export default function Header() {
               ))}
             </div>
 
-            {/* Desktop: Search + Wishlist + Cart + User */}
+            {/* Desktop: Search + Cart + User */}
             <div className="hidden lg:flex items-center gap-3">
               {/* Search Desktop */}
               <div ref={searchRef} className="relative w-64">
@@ -248,47 +175,23 @@ export default function Header() {
                 )}
               </div>
 
-              {/* Wishlist Icon */}
-              <Link
-                to="/yeu-thich"
-                className="relative p-2.5 rounded-full hover:bg-red-50 transition-all group"
-                aria-label="Sản phẩm yêu thích"
-              >
-                <Heart 
-                  size={22} 
-                  className={`transition-colors ${
-                    isActive('/yeu-thich')
-                      ? 'text-red-500 fill-current'
-                      : 'text-gray-600 group-hover:text-red-500'
-                  }`}
-                />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                    {wishlistCount > 9 ? '9+' : wishlistCount}
-                  </span>
-                )}
-              </Link>
-
               {/* Cart Icon */}
-              <button 
-                onClick={() => navigate('/gio-hang')}
-                className="relative p-2.5 rounded-full hover:bg-gray-100 transition-all"
-              >
+              <button className="relative p-2.5 rounded-full hover:bg-gray-100 transition-all">
                 <ShoppingCart size={22} className="text-gray-700 hover:text-amber-600" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                  <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                     {cartCount > 9 ? '9+' : cartCount}
                   </span>
                 )}
               </button>
 
               {/* User Icon */}
-              {/* <button className="p-2.5 rounded-full hover:bg-gray-100 transition-all">
+              <button className="p-2.5 rounded-full hover:bg-gray-100 transition-all">
                 <User size={22} className="text-gray-700 hover:text-amber-600" />
-              </button> */}
+              </button>
             </div>
 
-            {/* Mobile: Search + Wishlist + Cart + Menu */}
+            {/* Mobile: Search + Cart + Menu */}
             <div className="flex lg:hidden items-center gap-2">
               {/* Search Mobile */}
               <div className="relative flex-1">
@@ -306,35 +209,11 @@ export default function Header() {
                 <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
               </div>
 
-              {/* Wishlist Mobile */}
-              <Link
-                to="/yeu-thich"
-                className="relative p-2 rounded-full hover:bg-red-50 transition-all"
-                aria-label="Sản phẩm yêu thích"
-              >
-                <Heart 
-                  size={20} 
-                  className={`transition-colors ${
-                    isActive('/yeu-thich')
-                      ? 'text-red-500 fill-current'
-                      : 'text-gray-600'
-                  }`}
-                />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                    {wishlistCount > 9 ? '9+' : wishlistCount}
-                  </span>
-                )}
-              </Link>
-
               {/* Cart Mobile */}
-              <button 
-                onClick={() => navigate('/gio-hang')}
-                className="relative p-2 rounded-full hover:bg-gray-100"
-              >
+              <button className="relative p-2 rounded-full hover:bg-gray-100">
                 <ShoppingCart size={20} className="text-gray-700" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center text-[10px] animate-pulse">
+                  <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
                     {cartCount > 9 ? '9+' : cartCount}
                   </span>
                 )}
@@ -423,33 +302,13 @@ export default function Header() {
                   {item.label}
                 </Link>
               ))}
-
-              {/* Wishlist Link in Mobile */}
-              <Link
-                to="/yeu-thich"
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center justify-between py-3 px-4 rounded-lg transition font-medium ${
-                  isActive('/yeu-thich')
-                    ? "bg-amber-100 text-amber-700"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <Heart size={18} className={isActive('/yeu-thich') ? 'fill-current' : ''} />
-                  Yêu thích
-                </span>
-                {wishlistCount > 0 && (
-                  <span className="bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                    {wishlistCount > 9 ? '9+' : wishlistCount}
-                  </span>
-                )}
-              </Link>
             </div>
           </div>
         </>
       )}
 
-
+      {/* Spacer */}
+      <div className="h-20 md:h-20"></div>
     </>
   );
 }

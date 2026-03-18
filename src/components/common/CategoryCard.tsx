@@ -10,7 +10,7 @@ export default function CategoryCard({ category, onClick }: CategoryCardProps) {
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 hover:scale-105 group"
+      className="bg-white rounded-2xl p-6 transition-all transform hover:-translate-y-2 hover:scale-105 group"
     >
       <div className="text-6xl mb-4 text-center group-hover:scale-110 transition-transform">
         {/* {category.icon === 'motor' ? 'motor' : category.icon === 'inverter' ? 'inverter' : 'tools'} */}

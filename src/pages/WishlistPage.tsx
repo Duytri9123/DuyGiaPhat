@@ -54,7 +54,7 @@ export default function WishlistPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 py-8 pt-20 md:pt-40">
       <div className="max-w-7xl mx-auto px-4">
         {/* HEADER */}
         <div className="mb-8">

@@ -1,280 +1,584 @@
-// src/pages/ProductDetail.tsx
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { mockProducts } from "../data/mockData";
-import { categories } from "../data/categories";
+import { mockProducts, mockNews } from "../data/mockData";
 import {
-  Phone, ChevronRight, ArrowLeft, ChevronLeft, ChevronRight as ChevronRightIcon, Check
+  Phone, ChevronRight, ArrowLeft, Heart, Download, FileText, ShareIcon, ShoppingCart,
+  Zap, Calendar, Building2, Gauge, Plus, Minus, X, ZoomIn, Clock, Tag,
+  Facebook, Twitter, Linkedin, Mail, MessageCircle, Check
 } from "lucide-react";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
+  const [activeTab, setActiveTab] = useState("description");
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const productId = parseInt(id || "0");
   const product = mockProducts.find((p) => p.id === productId);
 
+  const productUrl = `https://duy-gia-phat.vercel.app/san-pham/${productId}`;
+  const productTitle = product?.name || 'Sản phẩm điện công nghiệp';
+  const shareText = `Xem sản phẩm: ${productTitle}`;
+
+  const handleShare = (platform: string) => {
+    const encodedUrl = encodeURIComponent(productUrl);
+    const encodedText = encodeURIComponent(shareText);
+
+    const shareLinks: { [key: string]: string } = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+      telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
+      email: `mailto:?subject=${encodeURIComponent(productTitle)}&body=${encodedText}%20${encodedUrl}`,
+    };
+
+    if (platform === 'copy') {
+      navigator.clipboard.writeText(productUrl);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } else if (shareLinks[platform]) {
+      window.open(shareLinks[platform], '_blank', 'width=600,height=400');
+    }
+  };
+
   if (!product) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="text-center bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-          <div className="text-6xl mb-4">box</div>
-          <p className="text-xl font-semibold text-gray-700 mb-4">Không tìm thấy sản phẩm</p>
+      <div className="min-h-screen bg-gray-50 pt-20 md:pt-40 flex items-center justify-center p-4">
+        <div className="text-center bg-white rounded-xl shadow-lg p-8 max-w-md w-full">
+          <div className="text-6xl mb-4">📦</div>
+          <p className="text-xl font-semibold text-gray-900 mb-4">Không tìm thấy sản phẩm</p>
           <button
             onClick={() => navigate("/san-pham")}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-blue-900 px-6 py-3 rounded-full font-bold hover:from-yellow-300 hover:to-orange-400 transition shadow-lg"
+            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-lg font-bold transition"
           >
-            <ArrowLeft size={20} /> Quay lại danh sách
+            <ArrowLeft size={20} /> Quay lại
           </button>
         </div>
       </div>
     );
   }
 
-  const currentCategory = categories.find((c) => c.slug === product.category);
+  const allImages = [product.image, ...(product.images || [])];
   const relatedProducts = mockProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 6);
+    .slice(0, 4);
 
-  const allImages = [product.image, ...(product.images || [])];
-  const totalImages = allImages.length;
+  const handleAddToCart = () => {
+    const savedCart = localStorage.getItem('cart');
+    let cart: typeof mockProducts = [];
 
-  const nextImage = () => setSelectedImage((prev) => (prev + 1) % totalImages);
-  const prevImage = () => setSelectedImage((prev) => (prev - 1 + totalImages) % totalImages);
+    if (savedCart) {
+      try {
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed)) {
+          cart = parsed;
+        }
+      } catch (error) {
+        cart = [];
+      }
+    }
+
+    const existingItem = cart.find((item) => item.id === product.id);
+    
+    if (!existingItem) {
+      cart.push(product);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      window.dispatchEvent(new Event('cartUpdated'));
+      alert(`✅ Đã thêm "${product.name}" vào giỏ hàng!`);
+    } else {
+      alert(`ℹ️ Sản phẩm này đã có trong giỏ hàng!`);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8 overflow-x-auto">
-          <button onClick={() => navigate("/")} className="hover:text-blue-600 whitespace-nowrap">Trang chủ</button>
-          <ChevronRight size={16} />
-          <button onClick={() => navigate("/san-pham")} className="hover:text-blue-600 whitespace-nowrap">Sản phẩm</button>
-          {currentCategory && (
-            <>
-              <ChevronRight size={16} />
-              <button
-                onClick={() => navigate(`/danh-muc/${currentCategory.slug}`)}
-                className="hover:text-blue-600 whitespace-nowrap"
-              >
-                {currentCategory.name}
-              </button>
-            </>
-          )}
-          <ChevronRight size={16} />
-          <span className="text-gray-900 font-medium whitespace-nowrap">{product.name}</span>
+    <div className="min-h-screen bg-white pt-20 md:pt-40">
+      {/* Breadcrumb */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <nav className="flex flex-wrap gap-2 text-sm text-gray-600">
+          <button onClick={() => navigate("/")} className="hover:text-amber-600">Trang chủ</button>
+          <span className="text-gray-400">/</span>
+          <button onClick={() => navigate("/san-pham")} className="hover:text-amber-600">Thiết bị cơ điện</button>
+          <span className="text-gray-400">/</span>
+          <span className="text-gray-900 font-semibold">{product.name}</span>
         </nav>
+      </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 mb-20">
-          {/* === GALLERY ẢNH === */}
-          <div className="space-y-6">
-            <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden group">
-              <div className="aspect-square relative">
-                <img
-                  src={allImages[selectedImage]}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-                {totalImages > 1 && (
-                  <>
-                    <button
-                      onClick={prevImage}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur rounded-full p-3 shadow-lg hover:bg-white transition opacity-0 group-hover:opacity-100"
-                    >
-                      <ChevronLeft size={24} />
-                    </button>
-                    <button
-                      onClick={nextImage}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur rounded-full p-3 shadow-lg hover:bg-white transition opacity-0 group-hover:opacity-100"
-                    >
-                      <ChevronRightIcon size={24} />
-                    </button>
-                  </>
-                )}
-                {product.badge && (
-                  <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                    {product.badge}
-                  </div>
-                )}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+          {/* Image Gallery */}
+          <div className="flex flex-col gap-4">
+            {/* Main Image */}
+            <div className="relative rounded-xl overflow-hidden bg-gray-100 aspect-square flex items-center justify-center cursor-pointer group" onClick={() => setIsZoomed(true)}>
+              <img
+                src={allImages[selectedImage]}
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:brightness-110 transition-all"
+              />
+              {product.badge && (
+                <span className="absolute top-4 left-4 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  {product.badge}
+                </span>
+              )}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
+                <div className="bg-white/90 rounded-full p-3 group-hover:scale-110 transition-transform">
+                  <ZoomIn size={24} className="text-gray-900" />
+                </div>
               </div>
             </div>
 
-            {totalImages > 1 && (
-              <div className="grid grid-cols-5 gap-3">
-                {allImages.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedImage(i)}
-                    className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
-                      selectedImage === i ? "border-yellow-500 shadow-lg" : "border-gray-200 hover:border-gray-400"
-                    }`}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Thumbnails */}
+            <div className="grid grid-cols-4 gap-3">
+              {allImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImage(idx)}
+                  className={`rounded-lg overflow-hidden border-2 transition-all aspect-square ${
+                    selectedImage === idx
+                      ? "border-amber-500 ring-2 ring-amber-300"
+                      : "border-gray-200 opacity-75 hover:opacity-100"
+                  }`}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* === THÔNG TIN CHI TIẾT === */}
-          <div className="space-y-8">
-            {/* Tiêu đề */}
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 leading-tight">
-                {product.name}
-              </h1>
-              <div className="flex items-center gap-6 text-sm">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
-                      }`}
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                    </svg>
-                  ))}
-                  <span className="ml-2 font-medium text-gray-700">{product.rating}</span>
-                </div>
-                <span className="text-gray-500">•</span>
-                <span className="text-gray-600">{product.sales} lượt đặt hàng</span>
-              </div>
+          {/* Product Info */}
+          <div className="flex flex-col">
+            {/* Status Badge */}
+            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-900 px-3 py-1 rounded-full text-xs font-bold w-fit mb-4">
+              ✓ Sẵn hàng
             </div>
 
-            {/* MÔ TẢ + THÔNG SỐ KỸ THUẬT */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-              <h3 className="font-bold text-lg mb-4 text-gray-800">Mô tả sản phẩm</h3>
-              <p className="text-gray-600 leading-relaxed mb-6">{product.description}</p>
+            {/* Title */}
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">{product.name}</h1>
+            <p className="text-gray-600 mb-6">Mã sản phẩm: <span className="font-semibold text-gray-900">DGP-{String(product.id).padStart(3, '0')}</span></p>
 
-              {product.specs && product.specs.length > 0 && (
-                <>
-                  <h4 className="font-bold text-lg mb-3 text-gray-800">Thông số kỹ thuật</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {product.specs.map((spec, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm">
-                        <Check className="text-green-500 mt-0.5 flex-shrink-0" size={16} />
-                        <div>
-                          <span className="font-medium text-gray-700">{spec.label}:</span>
-                          <span className="ml-1 text-gray-800">{spec.value}</span>
-                        </div>
-                      </div>
-                    ))}
+            {/* Price Box */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
+              <p className="text-3xl font-bold text-gray-900">Liên hệ báo giá</p>
+              <p className="text-sm text-gray-500 italic">(Đã bao gồm VAT)</p>
+            </div>
+
+            {/* Description */}
+            <p className="text-gray-700 mb-8 leading-relaxed">
+              {product.description || "Sản phẩm chất lượng cao, giải pháp điện công nghiệp hàng đầu."}
+            </p>
+
+            {/* Key Specs Grid */}
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              {product.specs?.slice(0, 4).map((spec, idx) => {
+                const getSpecIcon = () => {
+                  const label = spec.label.toLowerCase();
+                  if (label.includes('công suất') || label.includes('power') || label.includes('kw')) return <Zap className="text-amber-500" size={20} />;
+                  if (label.includes('bảo hành') || label.includes('warranty') || label.includes('tháng')) return <Calendar className="text-blue-500" size={20} />;
+                  if (label.includes('thương hiệu') || label.includes('brand') || label.includes('siemens')) return <Building2 className="text-purple-500" size={20} />;
+                  return <Gauge className="text-green-500" size={20} />;
+                };
+                return (
+                  <div key={idx} className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 bg-gray-50">
+                    {getSpecIcon()}
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-600 font-bold uppercase">{spec.label}</p>
+                      <p className="text-sm font-semibold text-gray-900">{spec.value}</p>
+                    </div>
                   </div>
-                </>
-              )}
+                );
+              })}
             </div>
 
-            {/* NÚT BÁO GIÁ + ZALO - MÀU VÀNG CAM */}
-            <div className="flex gap-3">
-              {/* Nút Báo giá */}
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                <ShoppingCart size={20} />
+                THÊM VÀO GIỎ HÀNG
+              </button>
               <a
-                href={`tel:0976707297`}
-                className={`flex-1 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 text-lg transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 ${
-                  product.inStock
-                    ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-blue-900 hover:from-yellow-300 hover:to-orange-400"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                href="tel:0976707297"
+                className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-amber-500 text-amber-600 font-bold py-4 px-6 rounded-lg hover:bg-amber-50 transition-all"
+              >
+                <Phone size={20} />
+                LIÊN HỆ BÁO GIÁ
+              </a>
+            </div>
+
+            {/* Share & Wishlist */}
+            <div className="flex gap-2 mt-6">
+              <div className="flex-1 relative">
+                <button
+                  onClick={() => setIsShareOpen(!isShareOpen)}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition"
+                >
+                  <ShareIcon size={18} /> Chia sẻ
+                </button>
+
+                {/* Share Modal */}
+                {isShareOpen && (
+                  <div className="absolute top-12 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-40 w-56">
+                    <p className="text-xs font-bold text-gray-600 uppercase mb-3 px-2">Chia sẻ trên</p>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => { handleShare('facebook'); setIsShareOpen(false); }}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition text-gray-700 hover:text-blue-600"
+                      >
+                        <Facebook size={18} className="text-blue-600" />
+                        <span className="text-sm font-medium">Facebook</span>
+                      </button>
+                      <button
+                        onClick={() => { handleShare('twitter'); setIsShareOpen(false); }}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition text-gray-700 hover:text-blue-400"
+                      >
+                        <Twitter size={18} className="text-blue-400" />
+                        <span className="text-sm font-medium">Twitter</span>
+                      </button>
+                      <button
+                        onClick={() => { handleShare('linkedin'); setIsShareOpen(false); }}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition text-gray-700 hover:text-blue-700"
+                      >
+                        <Linkedin size={18} className="text-blue-700" />
+                        <span className="text-sm font-medium">LinkedIn</span>
+                      </button>
+                      <button
+                        onClick={() => { handleShare('whatsapp'); setIsShareOpen(false); }}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition text-gray-700 hover:text-green-500"
+                      >
+                        <MessageCircle size={18} className="text-green-500" />
+                        <span className="text-sm font-medium">WhatsApp</span>
+                      </button>
+                      <button
+                        onClick={() => { handleShare('telegram'); setIsShareOpen(false); }}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition text-gray-700 hover:text-blue-500"
+                      >
+                        <MessageCircle size={18} className="text-blue-500" />
+                        <span className="text-sm font-medium">Telegram</span>
+                      </button>
+                      <button
+                        onClick={() => { handleShare('email'); setIsShareOpen(false); }}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition text-gray-700 hover:text-amber-600"
+                      >
+                        <Mail size={18} className="text-amber-600" />
+                        <span className="text-sm font-medium">Email</span>
+                      </button>
+                      <div className="border-t border-gray-200 my-2"></div>
+                      <button
+                        onClick={() => { handleShare('copy'); setIsShareOpen(false); }}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition text-gray-700 hover:text-gray-900"
+                      >
+                        {copySuccess ? (
+                          <>
+                            <Check size={18} className="text-green-500" />
+                            <span className="text-sm font-medium text-green-500">Đã sao chép!</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShareIcon size={18} />
+                            <span className="text-sm font-medium">Sao chép liên kết</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setIsWishlisted(!isWishlisted)}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition ${
+                  isWishlisted
+                    ? "bg-red-500 border-red-500 text-white"
+                    : "border-gray-200 text-gray-700 hover:bg-gray-50"
                 }`}
-                {...(!product.inStock && { "aria-disabled": true })}
               >
-                <Phone size={22} />
-                <span>Báo giá ngay</span>
-              </a>
-
-              {/* Nút Zalo */}
-              <a
-                href="https://zalo.me/0976707297"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all shadow-xl hover:shadow-2xl flex items-center justify-center"
-              >
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.89 1.402 5.45 3.589 7.163l-.766 2.844a.5.5 0 00.713.572l3.167-1.823A10.277 10.277 0 0012 20.486c5.523 0 10-4.145 10-9.243C22 6.145 17.523 2 12 2zm3.5 11.5h-7a.5.5 0 010-1h7a.5.5 0 010 1zm0-3h-7a.5.5 0 010-1h7a.5.5 0 010 1z" />
-                </svg>
-              </a>
-            </div>
-
-            {/* Cam kết */}
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              {[
-                "Hàng chính hãng 100%",
-                "Giao hàng toàn quốc",
-                "Hỗ trợ lắp đặt",
-                "Bảo hành dài hạn",
-                "CO/CQ đầy đủ",
-                "Tư vấn 24/7",
-              ].map((text, i) => (
-                <div key={i} className="flex items-center gap-2 text-green-600">
-                  <Check size={18} />
-                  <span className="font-medium">{text}</span>
-                </div>
-              ))}
+                <Heart size={18} className={isWishlisted ? "fill-current" : ""} /> Yêu thích
+              </button>
             </div>
           </div>
         </div>
 
-        {/* SẢN PHẨM LIÊN QUAN */}
+        {/* Tabs Section */}
+        <div className="border-t border-gray-200 pt-8">
+          {/* Tab Buttons */}
+          <div className="flex gap-8 border-b border-gray-200 mb-8 overflow-x-auto">
+            {["description", "specs", "documents"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`pb-4 px-2 font-semibold text-sm whitespace-nowrap border-b-2 transition-all ${
+                  activeTab === tab
+                    ? "border-amber-500 text-gray-900"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {tab === "description" && "Mô tả chi tiết"}
+                {tab === "specs" && "Thông số kỹ thuật"}
+                {tab === "documents" && "Tài liệu hướng dẫn"}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              {activeTab === "description" && (
+                <div className="space-y-6">
+                  <section>
+                    <h3 className="text-xl font-bold mb-4">Tổng quan sản phẩm</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Tủ điều khiển được thiết kế chuyên dụng cho các ứng dụng công nghiệp nặng. Với khả năng vận hành ổn định trong môi trường khắc nghiệt, thiết bị này là sự lựa chọn tối ưu cho các hệ thống máy nén, máy đùn, và hệ thống vận chuyển vật liệu.
+                    </p>
+                  </section>
+                  <section>
+                    <h3 className="text-xl font-bold mb-4">Tính năng nổi bật</h3>
+                    <ul className="space-y-3 text-gray-700">
+                      <li className="flex gap-3">
+                        <span className="text-amber-500">✓</span>
+                        <span>Tích hợp bộ lọc EMC lớp A chống nhiễu điện từ</span>
+                      </li>
+                      <li className="flex gap-3">
+                        <span className="text-amber-500">✓</span>
+                        <span>Chế độ điều khiển Vector không cần cảm biến cho momen xoắn cao</span>
+                      </li>
+                      <li className="flex gap-3">
+                        <span className="text-amber-500">✓</span>
+                        <span>Giao thức truyền thông RS485/USS/Modbus RTU tích hợp sẵn</span>
+                      </li>
+                      <li className="flex gap-3">
+                        <span className="text-amber-500">✓</span>
+                        <span>Cấp bảo vệ IP54, chống bụi và tia nước bắn từ mọi phía</span>
+                      </li>
+                    </ul>
+                  </section>
+                </div>
+              )}
+
+              {activeTab === "specs" && (
+                <div className="space-y-4">
+                  {product.specs?.map((spec, idx) => (
+                    <div key={idx} className="flex justify-between pb-4 border-b border-gray-200 last:border-0">
+                      <span className="text-gray-600 font-medium">{spec.label}</span>
+                      <span className="font-semibold text-gray-900">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {activeTab === "documents" && (
+                <div className="space-y-4">
+                  {[
+                    { name: "Catalog sản phẩm.pdf", size: "2.4 MB" },
+                    { name: "Hướng dẫn lắp đặt tủ.pdf", size: "1.8 MB" },
+                    { name: "Sơ đồ đấu nối mạch.pdf", size: "3.1 MB" },
+                  ].map((doc, idx) => (
+                    <a
+                      key={idx}
+                      href="#"
+                      className="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition group"
+                    >
+                      <FileText size={32} className="text-red-500 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm group-hover:text-amber-600 transition line-clamp-1">{doc.name}</p>
+                        <p className="text-xs text-gray-500">{doc.size}</p>
+                      </div>
+                      <Download size={20} className="text-gray-400 group-hover:text-amber-600 transition shrink-0" />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 h-fit">
+              <h3 className="text-lg font-bold mb-6">Thông số cơ bản</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between pb-3 border-b border-gray-200">
+                  <span className="text-gray-600 text-sm">Hãng SX</span>
+                  <span className="font-semibold text-sm">Siemens</span>
+                </div>
+                <div className="flex justify-between pb-3 border-b border-gray-200">
+                  <span className="text-gray-600 text-sm">Series</span>
+                  <span className="font-semibold text-sm">G120</span>
+                </div>
+                <div className="flex justify-between pb-3 border-b border-gray-200">
+                  <span className="text-gray-600 text-sm">Kiểu lắp</span>
+                  <span className="font-semibold text-sm">Treo tường</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 text-sm">Bảo hành</span>
+                  <span className="font-semibold text-sm">24 tháng</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <section className="mb-20">
-            <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">
-              Sản phẩm cùng danh mục
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-              {relatedProducts.map((item) => (
+          <div className="mt-20">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Sản phẩm liên quan</h2>
+              <button
+                onClick={() => navigate("/san-pham")}
+                className="text-amber-600 font-semibold flex items-center gap-2 hover:gap-3 transition-all"
+              >
+                Xem tất cả <ChevronRight size={20} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((related) => (
                 <button
-                  key={item.id}
-                  onClick={() => {
-                    setSelectedImage(0);
-                    navigate(`/san-pham/${item.id}`);
-                    window.scrollTo(0, 0);
-                  }}
-                  className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all hover:-translate-y-3 text-left overflow-hidden"
+                  key={related.id}
+                  onClick={() => navigate(`/san-pham/${related.id}`)}
+                  className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg hover:border-amber-200 transition-all text-left"
                 >
-                  <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50">
+                  <div className="aspect-square overflow-hidden bg-gray-100">
                     <img
-                      src={item.image}
-                      alt={item.name}
+                      src={related.image}
+                      alt={related.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
-                    {item.badge && (
-                      <span className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs px-3 py-1 rounded-full font-bold">
-                        {item.badge}
-                      </span>
-                    )}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-bold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition">
-                      {item.name}
+                    <p className="text-xs text-gray-500 font-bold mb-1 uppercase">Siemens</p>
+                    <h3 className="font-bold text-sm mb-2 group-hover:text-amber-600 transition line-clamp-2">
+                      {related.name}
                     </h3>
-                    <div className="mt-3 flex gap-2">
-                      <a
-                        href="tel:0976707297"
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex-1 text-center py-2 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-blue-900 text-xs font-bold hover:from-yellow-300 hover:to-orange-400 transition shadow"
-                      >
-                        Báo giá
-                      </a>
-                      <a
-                        href="https://zalo.me/0976707297"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="px-2 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-                      >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.89 1.402 5.45 3.589 7.163l-.766 2.844a.5.5 0 00.713.572l3.167-1.823A10.277 10.277 0 0012 20.486c5.523 0 10-4.145 10-9.243C22 6.145 17.523 2 12 2zm3.5 11.5h-7a.5.5 0 010-1h7a.5.5 0 010 1zm0-3h-7a.5.5 0 010-1h7a.5.5 0 010 1z" />
-                        </svg>
-                      </a>
-                    </div>
+                    <p className="text-amber-600 font-bold text-sm">Liên hệ</p>
                   </div>
                 </button>
               ))}
             </div>
-          </section>
+          </div>
         )}
+
+        {/* News & Articles Section */}
+        <div className="mt-20 pt-16 border-t border-gray-200">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Tin tức & Bài viết liên quan</h2>
+            <button
+              onClick={() => navigate("/tin-tuc")}
+              className="text-amber-600 font-semibold flex items-center gap-2 hover:gap-3 transition-all"
+            >
+              Xem tất cả <ChevronRight size={20} />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {mockNews.slice(0, 3).map((article) => (
+              <button
+                key={article.id}
+                onClick={() => navigate(`/tin-tuc/${article.id}`)}
+                className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg hover:border-amber-200 transition-all text-left"
+              >
+                {/* Article Image */}
+                <div className="aspect-video overflow-hidden bg-gray-100">
+                  <img
+                    src={article.image}
+                    alt={article.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+
+                {/* Article Content */}
+                <div className="p-5">
+                  {/* Category & Date */}
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <Tag size={14} className="text-amber-500" />
+                      <span className="text-xs font-bold text-amber-600 uppercase">{article.category}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Clock size={14} />
+                      {article.date}
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="font-bold text-sm mb-3 line-clamp-2 group-hover:text-amber-600 transition">
+                    {article.title}
+                  </h3>
+
+                  {/* Excerpt */}
+                  <p className="text-xs text-gray-600 line-clamp-2 mb-4">
+                    {article.excerpt}
+                  </p>
+
+                  {/* Read More Link */}
+                  <div className="text-amber-600 font-semibold text-xs flex items-center gap-1 group-hover:gap-2 transition-all">
+                    Đọc thêm <ChevronRight size={14} />
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* Zoom Modal */}
+      {isZoomed && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setIsZoomed(false)}>
+          <div className="relative w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
+            {/* Close Button */}
+            <button
+              onClick={() => setIsZoomed(false)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition"
+            >
+              <X size={32} />
+            </button>
+
+            {/* Image Container */}
+            <div className="bg-white rounded-lg overflow-hidden flex items-center justify-center" style={{ maxHeight: '80vh' }}>
+              <div className="relative" style={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '100%' }}>
+                <img
+                  src={allImages[selectedImage]}
+                  alt={product.name}
+                  style={{
+                    transform: `scale(${zoomLevel / 100})`,
+                    transition: 'transform 0.2s',
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/95 rounded-full px-6 py-3 shadow-lg">
+              <button
+                onClick={() => setZoomLevel(Math.max(100, zoomLevel - 20))}
+                className="p-2 hover:bg-gray-100 rounded-full transition"
+              >
+                <Minus size={20} className="text-gray-700" />
+              </button>
+              <span className="w-12 text-center font-bold text-gray-900">{zoomLevel}%</span>
+              <button
+                onClick={() => setZoomLevel(Math.min(300, zoomLevel + 20))}
+                className="p-2 hover:bg-gray-100 rounded-full transition"
+              >
+                <Plus size={20} className="text-gray-700" />
+              </button>
+              <div className="w-px h-6 bg-gray-300 mx-2"></div>
+              <button
+                onClick={() => setZoomLevel(100)}
+                className="px-4 py-1 hover:bg-amber-50 text-amber-600 font-bold rounded-full transition"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
