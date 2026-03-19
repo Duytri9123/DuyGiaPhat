@@ -1,9 +1,16 @@
 import { mockPartners } from '../data/mockData';
+import { SEO } from '../components/common/SEO';
 import { Globe } from 'lucide-react';
 
 export default function PartnersPage() {
   return (
     <div className="min-h-screen bg-gray-50 pt-20 md:pt-40 pb-20">
+      <SEO
+        title="Đối tác & khách hàng Duy Gia Phát"
+        description="Danh sách đối tác và khách hàng tiêu biểu đã tin tưởng sử dụng giải pháp thiết bị và dịch vụ kỹ thuật của Duy Gia Phát."
+        url="https://duygiaphat.vn/doi-tac"
+        image="https://duygiaphat.vn/og/partners.jpg"
+      />
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">

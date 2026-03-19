@@ -6,6 +6,7 @@ import ProductCard from "../components/common/ProductCard";
 import { useState, useMemo } from "react";
 import { Filter, SlidersHorizontal, X } from "lucide-react";
 import AMB_headerbanner from "../assets/AMB_headerbanner.jpg";
+import { SEO } from "../components/common/SEO";
 
 type SortOption = "name" | "rating-desc" | "rating-asc" | "sales-desc" | "sales-asc" | "stock";
 
@@ -34,9 +35,7 @@ export default function Products() {
     // Lọc theo tìm kiếm
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter((p) => p.name.toLowerCase().includes(query));
     }
 
     // Lọc theo tình trạng kho
@@ -76,6 +75,12 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-[#f3f4f6] pt-20 md:pt-32">
+      <SEO
+        title={`${pageTitle} | Thiết bị điện & tủ điện công nghiệp`}
+        description="Danh mục sản phẩm tủ điện, thiết bị điện công nghiệp và giải pháp tự động hóa do Duy Gia Phát cung cấp cho nhà máy, khu công nghiệp."
+        url={category ? `https://duygiaphat.vn/san-pham/${category}` : "https://duygiaphat.vn/san-pham"}
+        image="https://duygiaphat.vn/og/products.jpg"
+      />
       {/* Hero */}
       <section className="relative h-44 md:h-52 flex items-center bg-slate-900 overflow-hidden">
         <div

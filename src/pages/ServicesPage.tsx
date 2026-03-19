@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Headphones,
 } from "lucide-react";
+import { SEO } from "../components/common/SEO";
 
 const services = [
   {
@@ -115,7 +116,13 @@ const processSteps = [
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen bg-white pt-20 md:pt-32">
+    <div className="min-h-screen bg-slate-50 pt-20 md:pt-32">
+      <SEO
+        title="Dịch vụ kỹ thuật & bảo trì hệ thống"
+        description="Dịch vụ kỹ thuật, lắp đặt, bảo trì và nâng cấp hệ thống điện – tự động hóa cho nhà máy từ Duy Gia Phát. Đảm bảo vận hành ổn định và an toàn."
+        url="https://duygiaphat.vn/dich-vu"
+        image="https://duygiaphat.vn/og/services.jpg"
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-slate-950 text-white">
         <div className="max-w-7xl mx-auto px-4 py-16 md:py-24 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">

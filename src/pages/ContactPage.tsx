@@ -1,5 +1,6 @@
 import React from "react";
 import { Building2, Factory, AlertTriangle, Headset, Phone, Mail, MapPin, Send } from "lucide-react";
+import { SEO } from "../components/common/SEO";
 
 const GOOGLE_SHEET_SCRIPT = "https://script.google.com/macros/s/AKfycbyhVaELyytmcfZMpksKsiDLwfb2clZ-7mFv48vt8SC1lcdfyelSaApBQTdBIAdNpqC9/exec";
 
@@ -41,6 +42,12 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 md:pt-32">
+      <SEO
+        title="Liên hệ & yêu cầu báo giá"
+        description="Gửi yêu cầu tư vấn, báo giá thiết bị và giải pháp kỹ thuật tới Duy Gia Phát. Đội ngũ chuyên gia phản hồi trong vòng 24 giờ."
+        url="https://duygiaphat.vn/lien-he"
+        image="https://duygiaphat.vn/og/contact.jpg"
+      />
       {/* Hero */}
       <section className="relative h-80 md:h-96 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-slate-950">

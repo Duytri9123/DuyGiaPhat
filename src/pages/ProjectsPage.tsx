@@ -1,9 +1,16 @@
 import { mockProjects } from '../data/mockData';
 import { MapPin, CheckCircle, Clock } from 'lucide-react';
+import { SEO } from '../components/common/SEO';
 
 export default function ProjectsPage() {
   return (
     <div className="min-h-screen bg-gray-50 pt-20 md:pt-40 pb-20">
+      <SEO
+        title="Dự án tiêu biểu Duy Gia Phát"
+        description="Các dự án tiêu biểu Duy Gia Phát đã triển khai cho nhà máy và khu công nghiệp: hệ thống tủ điện, giải pháp tự động hóa, nâng cấp hạ tầng kỹ thuật."
+        url="https://duygiaphat.vn/du-an"
+        image="https://duygiaphat.vn/og/projects.jpg"
+      />
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">

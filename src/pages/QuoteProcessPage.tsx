@@ -1,8 +1,15 @@
 import { ClipboardList, SearchCheck, Calculator, FileCheck2, Factory, Bolt, Settings, HeadsetIcon, ArrowRight } from "lucide-react";
+import { SEO } from "../components/common/SEO";
 
 export default function QuoteProcessPage() {
   return (
     <div className="min-h-screen bg-gray-50 pt-20 md:pt-32">
+      <SEO
+        title="Quy trình báo giá & triển khai dự án"
+        description="Quy trình tiếp nhận yêu cầu, tư vấn giải pháp, báo giá và triển khai dự án của Duy Gia Phát cho khách hàng doanh nghiệp và nhà máy."
+        url="https://duygiaphat.vn/quy-trinh-bao-gia"
+        image="https://duygiaphat.vn/og/quote-process.jpg"
+      />
       {/* Hero */}
       <section className="relative h-[320px] sm:h-[360px] md:h-[420px] flex items-center justify-center overflow-hidden bg-slate-950">
         <div

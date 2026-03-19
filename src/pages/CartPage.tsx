@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingCart, ArrowLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { mockProducts } from '../data/mockData';
+import { SEO } from '../components/common/SEO';
 
 interface CartItem {
   id: number;
@@ -36,13 +37,15 @@ export default function CartPage() {
             setCartItems([]);
             return;
           }
-          // Hỗ trợ cả dữ liệu dạng Product[] và CartItem[] lưu trong localStorage
           const items: CartItem[] = parsed.map((entry: any) => ({
             id: entry.id,
             name: entry.name,
             image: entry.image,
             price: typeof entry.price === 'number' ? entry.price : 'Liên hệ',
-            quantity: typeof entry.quantity === 'number' && entry.quantity > 0 ? entry.quantity : 1,
+            quantity:
+              typeof entry.quantity === 'number' && entry.quantity > 0
+                ? entry.quantity
+                : 1,
             category: entry.category,
             inStock: entry.inStock ?? true,
           }));
@@ -134,6 +137,12 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 md:pt-40">
+      <SEO
+        title="Giỏ hàng & yêu cầu báo giá thiết bị"
+        description="Xem lại các sản phẩm đã chọn và gửi yêu cầu báo giá thiết bị, tủ điện và giải pháp kỹ thuật tới Duy Gia Phát."
+        url="https://duygiaphat.vn/gio-hang"
+        image="https://duygiaphat.vn/og/cart.jpg"
+      />
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">

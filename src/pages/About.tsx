@@ -1,6 +1,7 @@
 // src/pages/About.tsx
 import { Phone, Mail, MapPin, Clock, Eye, Rocket, Lightbulb, Handshake, CheckCircle2, Factory, Sparkles } from "lucide-react";
 import type React from "react";
+import { SEO } from "../components/common/SEO";
 import {
   aboutHistory,
   visionMission,
@@ -23,6 +24,12 @@ const FACTORY_IMAGE =
 export default function About() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pt-24 md:pt-32">
+      <SEO
+        title="Giới thiệu công ty Duy Gia Phát"
+        description="Tìm hiểu về Duy Gia Phát – đơn vị cung cấp giải pháp thiết bị và dịch vụ kỹ thuật cho nhà máy, với đội ngũ kỹ sư giàu kinh nghiệm và quy trình chuyên nghiệp."
+        url="https://duygiaphat.vn/gioi-thieu"
+        image="https://duygiaphat.vn/og/about.jpg"
+      />
       <div className="max-w-7xl mx-auto px-4 lg:px-8 pb-20 space-y-20">
         {/* HERO */}
         <section className="relative overflow-hidden rounded-3xl md:rounded-[2.25rem] h-[520px] md:h-[640px] flex items-center shadow-2xl">

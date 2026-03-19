@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Heart, ShoppingBag, Trash2, ArrowLeft } from 'lucide-react';
 import ProductCard from '../components/common/ProductCard';
 import { type Product } from '../data/mockData';
+import { SEO } from '../components/common/SEO';
 
 export default function WishlistPage() {
   const navigate = useNavigate();
@@ -55,6 +56,12 @@ export default function WishlistPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 py-8 pt-20 md:pt-40">
+      <SEO
+        title="Sản phẩm yêu thích của bạn"
+        description="Danh sách các sản phẩm điện công nghiệp, tủ điện và thiết bị kỹ thuật mà bạn đã lưu yêu thích tại Duy Gia Phát."
+        url="https://duygiaphat.vn/yeu-thich"
+        image="https://duygiaphat.vn/og/wishlist.jpg"
+      />
       <div className="max-w-7xl mx-auto px-4">
         {/* HEADER */}
         <div className="mb-8">

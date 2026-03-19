@@ -1,6 +1,7 @@
 import { mockNews } from "../data/mockData";
 import { CalendarDays, Eye, ChevronRight } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { SEO } from "../components/common/SEO";
 
 export default function NewsPage() {
   const navigate = useNavigate();
@@ -13,6 +14,36 @@ export default function NewsPage() {
 
   return (
     <main className="min-h-screen bg-gray-100 pt-24 pb-16">
+      <SEO
+        title={id ? article.title : "Tin tức & kiến thức kỹ thuật"}
+        description={
+          id
+            ? article.excerpt || article.title
+            : "Cập nhật tin tức, kiến thức kỹ thuật và chia sẻ kinh nghiệm vận hành hệ thống điện – tự động hóa từ Duy Gia Phát."
+        }
+        url={id ? `https://duygiaphat.vn/tin-tuc/${id}` : "https://duygiaphat.vn/tin-tuc"}
+        image={id ? article.image : "https://duygiaphat.vn/og/news.jpg"}
+        structuredData={
+          id
+            ? {
+                '@context': 'https://schema.org',
+                '@type': 'Article',
+                headline: article.title,
+                description: article.excerpt || article.title,
+                author: {
+                  '@type': 'Person',
+                  name: article.author,
+                },
+                datePublished: article.date,
+                dateModified: article.date,
+                mainEntityOfPage: {
+                  '@type': 'WebPage',
+                  '@id': `https://duygiaphat.vn/tin-tuc/${id}`,
+                },
+              }
+            : undefined
+        }
+      />
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.08em] sm:tracking-[0.15em] text-slate-500 mb-8">

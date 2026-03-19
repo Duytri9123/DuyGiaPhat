@@ -6,6 +6,7 @@ import { categories } from "../data/categories";
 import { ChevronRight, CheckCircle, Heart, BadgeCheck, Truck, Headphones, Zap, Globe, Calendar, Clock, Tag, Phone, Minus } from "lucide-react";
 import AMB_headerbanner from "../assets/AMB_headerbanner.jpg";
 import { CategoryIcon } from "../components/common/CategoryIcons";
+import { SEO } from "../components/common/SEO";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -629,6 +630,12 @@ export default function Home() {
             </a>
           ))}
         </div>
+                <SEO
+                  title="Giải pháp tủ điện & thiết bị công nghiệp Duy Gia Phát"
+                  description="Duy Gia Phát cung cấp hệ thống tủ điện, thiết bị điện công nghiệp và giải pháp tự động hóa cho nhà máy, khu công nghiệp với đội ngũ kỹ sư giàu kinh nghiệm."
+                  url="https://duygiaphat.vn/"
+                  image="https://duygiaphat.vn/og/home.jpg"
+                />
       </section>
 
       {/* CTA Section */}
