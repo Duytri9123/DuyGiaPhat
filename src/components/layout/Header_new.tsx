@@ -56,6 +56,41 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Đồng bộ số lượng sản phẩm trong giỏ hàng từ localStorage
+  useEffect(() => {
+    const loadCartCount = () => {
+      const savedCart = localStorage.getItem("cart");
+      if (savedCart) {
+        try {
+          const cart = JSON.parse(savedCart);
+          if (Array.isArray(cart)) {
+            setCartCount(cart.length);
+          } else {
+            setCartCount(0);
+          }
+        } catch (error) {
+          setCartCount(0);
+        }
+      } else {
+        setCartCount(0);
+      }
+    };
+
+    loadCartCount();
+
+    const handleCartChange = () => {
+      loadCartCount();
+    };
+
+    window.addEventListener("storage", handleCartChange);
+    window.addEventListener("cartUpdated", handleCartChange);
+
+    return () => {
+      window.removeEventListener("storage", handleCartChange);
+      window.removeEventListener("cartUpdated", handleCartChange);
+    };
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {

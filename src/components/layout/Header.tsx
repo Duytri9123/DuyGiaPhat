@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Search, ShoppingCart, User, Heart, CheckCircle, Truck, Headphones } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, Heart, CheckCircle, Truck, Headphones } from "lucide-react";
 import { mockProducts } from "../../data/mockData";
 import logo from "../../assets/logo.png";
 

@@ -1,17 +1,16 @@
 // src/pages/Home.tsx
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { mockProducts, mockPartners, mockNews, mockProjects } from "../data/mockData";
 import { categories } from "../data/categories";
-import { ChevronRight, CheckCircle, Heart, BadgeCheck, Truck, Headphones, Zap, Globe, Calendar, Clock, Tag, Phone, Minus } from "lucide-react";
+import { ChevronRight, CheckCircle, Heart, BadgeCheck, Truck, Headphones, Clock, Tag, Phone, Minus } from "lucide-react";
 import AMB_headerbanner from "../assets/AMB_headerbanner.jpg";
 import { CategoryIcon } from "../components/common/CategoryIcons";
 import { SEO } from "../components/common/SEO";
 
 export default function Home() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  
   const [heroBackground, setHeroBackground] = useState<string>(AMB_headerbanner);
   
   // Animated text rotation
@@ -141,7 +140,6 @@ export default function Home() {
       const categorySlug = e.detail;
       const category = categories.find(c => c.slug === categorySlug);
       if (category) {
-        setSelectedCategory(categorySlug);
         setHeroBackground(category.iconUrl);
       }
     };

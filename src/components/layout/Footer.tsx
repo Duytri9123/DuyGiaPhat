@@ -1,5 +1,4 @@
 // src/components/layout/Footer.tsx
-import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Facebook } from "lucide-react";
 import logo from "../../assets/logo.png";
 

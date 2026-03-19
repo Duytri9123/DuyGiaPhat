@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingCart, ArrowLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { mockProducts } from '../data/mockData';
 import { SEO } from '../components/common/SEO';
 
 interface CartItem {

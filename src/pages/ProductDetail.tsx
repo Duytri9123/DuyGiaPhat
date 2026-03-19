@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { mockProducts, mockNews } from "../data/mockData";
 import {
   Phone, ChevronRight, ArrowLeft, Heart, Download, FileText, ShareIcon, ShoppingCart,
-  Zap, Calendar, Building2, Gauge, Plus, Minus, X, ZoomIn, Clock, Tag,
+  Zap, Calendar, Building2, Gauge, Plus, Minus, X, Clock, Tag,
   Facebook, Twitter, Linkedin, Mail, MessageCircle, Check
 } from "lucide-react";
 
