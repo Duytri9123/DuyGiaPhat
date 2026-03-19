@@ -104,28 +104,22 @@ export default function CartPage() {
     setSubmitStatus('idle');
 
     try {
-      const payload = {
-        customerName,
-        phone,
-        email,
-        company,
-        note,
-        total,
-        items: cartItems,
-        submittedAt: new Date().toISOString(),
-      };
+      const formData = new FormData();
+      formData.append('formType', 'cart');
+      formData.append('customerName', customerName);
+      formData.append('phone', phone);
+      formData.append('email', email);
+      formData.append('company', company);
+      formData.append('note', note);
+      formData.append('total', String(total));
+      formData.append('items', JSON.stringify(cartItems));
+      formData.append('submittedAt', new Date().toISOString());
 
-      const res = await fetch(GOOGLE_SHEET_ENDPOINT, {
+      await fetch(GOOGLE_SHEET_ENDPOINT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        mode: 'no-cors',
+        body: formData,
       });
-
-      if (!res.ok) {
-        throw new Error('Request failed');
-      }
 
       setSubmitStatus('success');
       alert('Đã gửi yêu cầu báo giá thành công!');

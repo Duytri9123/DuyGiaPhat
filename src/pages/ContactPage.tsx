@@ -1,10 +1,42 @@
+import React from "react";
 import { Building2, Factory, AlertTriangle, Headset, Phone, Mail, MapPin, Send } from "lucide-react";
 
+const GOOGLE_SHEET_SCRIPT = "https://script.google.com/macros/s/AKfycbyhVaELyytmcfZMpksKsiDLwfb2clZ-7mFv48vt8SC1lcdfyelSaApBQTdBIAdNpqC9/exec";
+
 export default function ContactPage() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Tạm thời chỉ chặn submit thực, có thể tích hợp API sau
-    alert("Cảm ơn bạn đã gửi yêu cầu. Chúng tôi sẽ liên hệ trong thời gian sớm nhất!");
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    // Lấy đúng tên hiển thị của mục đích liên hệ (text trong select)
+    const purposeSelect = form.querySelector<HTMLSelectElement>('select[name="purpose"]');
+    if (purposeSelect) {
+      const selectedText = purposeSelect.options[purposeSelect.selectedIndex]?.text || "";
+      formData.set("purpose", selectedText);
+    }
+
+    // Đánh dấu loại form để Apps Script tách đúng sheet
+    formData.append("formType", "contact");
+    formData.append("timestamp", new Date().toISOString());
+    formData.append("ip", "");
+
+    try {
+      await fetch(GOOGLE_SHEET_SCRIPT, {
+        method: "POST",
+        mode: "no-cors",
+        body: formData,
+      });
+
+      // Với mode "no-cors" ta không đọc được phản hồi,
+      // nhưng request vẫn được gửi tới Apps Script/Google Sheet
+      alert("Gửi thành công! Cảm ơn bạn đã gửi yêu cầu. Chúng tôi sẽ liên hệ trong thời gian sớm nhất!");
+      form.reset();
+    } catch (error) {
+      alert("Gửi thất bại! Vui lòng thử lại sau.");
+      console.error(error);
+    }
   };
 
   return (
@@ -171,6 +203,7 @@ export default function ContactPage() {
                     </label>
                     <input
                       type="text"
+                      name="fullName"
                       required
                       placeholder="Nguyễn Văn A"
                       className="w-full bg-gray-100 border-none focus:ring-2 focus:ring-amber-400/70 rounded-lg px-4 py-3 placeholder:text-slate-400 text-slate-900 outline-none transition-all"
@@ -182,6 +215,7 @@ export default function ContactPage() {
                     </label>
                     <input
                       type="tel"
+                      name="phone"
                       required
                       placeholder="0901 234 567"
                       className="w-full bg-gray-100 border-none focus:ring-2 focus:ring-amber-400/70 rounded-lg px-4 py-3 placeholder:text-slate-400 text-slate-900 outline-none transition-all"
@@ -196,6 +230,7 @@ export default function ContactPage() {
                     </label>
                     <input
                       type="email"
+                      name="email"
                       required
                       placeholder="example@mail.com"
                       className="w-full bg-gray-100 border-none focus:ring-2 focus:ring-amber-400/70 rounded-lg px-4 py-3 placeholder:text-slate-400 text-slate-900 outline-none transition-all"
@@ -206,6 +241,7 @@ export default function ContactPage() {
                       Mục đích liên hệ
                     </label>
                     <select
+                      name="purpose"
                       className="w-full bg-gray-100 border-none focus:ring-2 focus:ring-amber-400/70 rounded-lg px-4 py-3 text-slate-700 outline-none transition-all cursor-pointer"
                       defaultValue="quotation"
                     >
@@ -223,6 +259,7 @@ export default function ContactPage() {
                   </label>
                   <textarea
                     rows={5}
+                    name="message"
                     required
                     placeholder="Hãy mô tả yêu cầu của bạn chi tiết nhất có thể để chúng tôi hỗ trợ tốt hơn..."
                     className="w-full bg-gray-100 border-none focus:ring-2 focus:ring-amber-400/70 rounded-lg px-4 py-3 placeholder:text-slate-400 text-slate-900 outline-none transition-all resize-none"
